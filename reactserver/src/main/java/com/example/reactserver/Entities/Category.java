@@ -1,6 +1,7 @@
 package com.example.reactserver.Entities;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,12 +12,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import com.example.reactserver.Enumeration.Priority;
 
-// Main Class ============================================================================================================================================
+// Class 
+// ===============================================================================================================================================
 @Entity
 @Table(name = "categories")
 public class Category {
     // Properties
-    // ------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -32,7 +34,7 @@ public class Category {
     private Priority priority;
 
     // Constructors
-    // ------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     public Category(String name, String description, Priority priority) {
         this.name = name;
         this.description = description;
@@ -42,8 +44,8 @@ public class Category {
     public Category() {
     }
 
-    // Getters and Setters
-    // ------------------------------------------------------------------------------
+    // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public String getName() {
         return name;
     }

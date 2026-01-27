@@ -1,7 +1,8 @@
 package com.example.reactserver.Services;
 
+// Imports 
+// ===============================================================================================================================================
 import org.springframework.http.HttpStatus;
-// Imports ===============================================================================================================================================
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,20 +22,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-// Main Class ============================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @Service
 @Transactional
 public class RequestService {
 
     // Properties
-    // ----------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
     private final RequestFileRepository requestFileRepository;
     private final FileStorageService fileStorageService;
 
-    // Constructors
-    // ----------------------------------------------------------------------------------------------
+    // Constructor
+    // ----------------------------------------------------------------------------------------------------------------
     public RequestService(RequestRepository requestRepository, CategoryRepository categoryRepository,
             RequestFileRepository requestFileRepository, FileStorageService fileStorageService) {
         this.requestRepository = requestRepository;
@@ -44,7 +46,7 @@ public class RequestService {
     }
 
     // Create Request
-    // ----------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public void createRequest(int categoryId, String description, List<MultipartFile> files, User currentUser) {
 
         // Create Request Object
@@ -80,8 +82,8 @@ public class RequestService {
         }
     }
 
-    // Get User Requests
-    // ----------------------------------------------------------------------------------------------
+    // Get Requests for User
+    // ----------------------------------------------------------------------------------------------------------------
     public List<RequestDTO> getRequestsForUser(User user, RequestStatus excludeStatus) {
 
         List<Request> requests;
@@ -112,6 +114,8 @@ public class RequestService {
                 }).toList();
     }
 
+    // Get All Requests
+    // ----------------------------------------------------------------------------------------------------------------
     public List<RequestDTO> getAllRequests() {
         return requestRepository.findAll()
                 .stream()
@@ -134,6 +138,8 @@ public class RequestService {
                 }).toList();
     }
 
+    // Update Request
+    // ----------------------------------------------------------------------------------------------------------------
     public void updateRequest(UpdateRequest updateRequest) {
         Request request = requestRepository.findById(updateRequest.getId())
                 .orElseThrow(() -> new ResponseStatusException(

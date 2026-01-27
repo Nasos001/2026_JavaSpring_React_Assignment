@@ -57,42 +57,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login
   // -----------------------------------------------------------------------------------------------
   const login = async (email: string, password: string) => {
-    const res = await fetch("http://localhost:8080/api/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      // Indicate Loading
+      setState(prev => ({ ...prev, loading: true }));
 
-    if (!res.ok) throw new Error();
+      // Make fetch
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      // Check Response
+      if (!res.ok) {
+        throw new Error("Invalid credentials");
+      }
 
-    setState({
-      authenticated: true,
-      role: data.role,
-      loading: false,
-    });
+      // Get data
+      const data = await res.json();
+      setState({
+        authenticated: true,
+        role: data.role,
+        loading: false,
+      });
 
-    navigate("/home");
+      // Redirect to Home
+      navigate("/home");
+    } catch (error) {
+      console.error("Login failed:", error);
+
+      setState({
+        authenticated: false,
+        role: null,
+        loading: false,
+      });
+
+      throw error; // allows UI to show message if desired
+    }
   };
+
 
   // Logout
   // -----------------------------------------------------------------------------------------------
   const logout = async () => {
-    await fetch("http://localhost:8080/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      // Make fetch
+      await fetch("http://localhost:8080/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
 
-    setState({
-      authenticated: false,
-      role: null,
-      loading: false,
-    });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      setState({
+        authenticated: false,
+        role: null,
+        loading: false,
+      });
 
-    navigate("/");
+      // Navigate to Intro
+      navigate("/");
+    }
   };
+
 
   // Provide the values
   // -----------------------------------------------------------------------------------------------

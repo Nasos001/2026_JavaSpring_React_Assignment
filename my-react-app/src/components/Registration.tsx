@@ -101,23 +101,23 @@ export default function Register() {
         setLoading(true);
 
         try {
-        // Make call
-        const res = await fetch("http://localhost:8080/api/auth/register", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify(form),
-        });
+            // Make call
+            const res = await fetch("http://localhost:8080/api/auth/register", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                },
+                body: JSON.stringify(form),
+            });
 
-        // Check Response
-        if (!res.ok) {
-            const msg = await res.text();
-            throw new Error(msg || "Registration failed");
-        }
+            // Check Response
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(msg || "Registration failed");
+            }
 
-        setSuccess(true);
-        setTimeout(() => navigate("/login"), 4000);
+            setSuccess(true);
+            setTimeout(() => navigate("/login"), 4000);
         
         } catch (err: unknown) {
             if (err instanceof Error) {

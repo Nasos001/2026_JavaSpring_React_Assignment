@@ -1,6 +1,7 @@
 package com.example.reactserver.Services;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,24 +13,23 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-// JWT Service ===========================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @Service
 public class JwtService {
 
-    // Setup
-    // --------------------------------------------------------------------------
-    // In production, store this in application.properties and use a strong secret
+    // Properties
+    // ----------------------------------------------------------------------------------------------------------------
     private final Key SECRET_KEY;
+    private final long EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
 
     public JwtService(@Value("${jwt.secret}") String secret) {
         // Convert base64 string to a Key
         this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    private final long EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
-
     // Generate Token
-    // -----------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -40,7 +40,7 @@ public class JwtService {
     }
 
     // Validate Token
-    // -----------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -54,7 +54,7 @@ public class JwtService {
     }
 
     // Get Email
-    // -----------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)

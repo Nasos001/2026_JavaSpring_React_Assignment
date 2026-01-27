@@ -1,9 +1,9 @@
-// Imports =============================================================================================================================
+// Imports 
+// ===================================================================================================================================================
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
-import { Menu, X } from 'lucide-react';
 
-// Interfaces ==========================================================================================================================
+// Interfaces 
+// ===================================================================================================================================================
 interface Request {
     id: number;
     description: string;
@@ -18,29 +18,17 @@ interface RequestFile {
     downloadUrl: string;
 }
 
-
+// Main Component
+// ===================================================================================================================================================
 export default function History() {
-    
-    // Check User Authorization ----------------------------------------------------------------
-    const navigate = useNavigate();
-    useEffect(() => {
-        fetch("http://localhost:8080/api/auth/check", {credentials: "include"})
-        .then((res) => {
-            if (res.status === 401) {
-                navigate("/login");
-            }
-        })
-        .catch((err) => {
-            console.error(err);
-        })
-    }, [navigate]);
 
-    // States & Var ----------------------------------------------------------------------------
-    const [hamburgerOpen, setHamburgerOpen] = useState(false);
+    // States & Var 
+    // --------------------------------------------------------------------------------------------------------------------
     const [error, setError] = useState(false);
     const [requests, setRequests] = useState<Request[]>([])
 
-    // Retrieve Ongoing Requests
+    // Retrieve All Requests
+    // --------------------------------------------------------------------------------------------------------------------
     useEffect(() => {
         const fetchRequests = async () => {
             // Make fetch
@@ -57,142 +45,54 @@ export default function History() {
         fetchRequests();
     }, [])
 
-    // JSX --------------------------------------------------------------------------------------
+    // JSX 
+    // --------------------------------------------------------------------------------------------------------------------
     return(
         <div className="min-h-screen bg-white">
-        {/* Navigation */}
-        <nav className="bg-white shadow-sm sticky top-0">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-            
-                {/* Logo */}
-                <span className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    MiHelper
-                </span>
-                
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-8">
-                    <a className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                    onClick={() => navigate("/home")}
-                    >
-                    Home
-                    </a>
-                    <a className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                    onClick={() => navigate("/New Request")}
-                    >
-                    New Request
-                    </a>
-                    <a className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                    onClick={() => navigate("/monitor")}
-                    >
-                    Monitor
-                    </a>
-                    <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                    History
-                    </a>
-                    <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                    Announcements
-                    </a>
-                    <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                    Features
-                    </a>
-                </div>
+            <p className="mt-10 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
+                Request History
+            </p>
 
-                {/* Mobile menu button */}
-                <div className="md:hidden">
-                    <button className="text-gray-700 hover:text-blue-600 p-2"
-                        onClick={() => setHamburgerOpen(!hamburgerOpen)}
-                    >
-                    {hamburgerOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            
-            </div>
+            {/* Main Section */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
 
-            {/* Mobile Navigation */}
-            {hamburgerOpen && (
-            <div className="md:hidden bg-white border-t">
-                <div className="px-2 pt-2 pb-3 space-y-1">
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#about"
-                >
-                    New Request
-                </a>
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#about"
-                >
-                    Monitor
-                </a>
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#about"
-                >
-                    History
-                </a>
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#about"
-                >
-                    Announcements
-                </a>
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#features"
-                >
-                    Features
-                </a>
+                {/* Show Error, if any */}
+                { error && 
+                    <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5bg-red-300">
+                        An error occurred when getting your requests. Please try again later.
+                    </p>
+                }
 
-                <a className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md"
-                    href="#about"
-                >
-                    About
-                </a>
-                </div>
-            </div>
-            )}
-        </nav>
+                {/* Display all the requests */}
+                {requests.length > 0 ? requests.map((request) => (
+                    <div key={request.id} className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4">
+                        <p className="font-semibold">Status: <span className='font-normal'>{request.status}</span></p>
+                        <p className="font-semibold">Category: <span className='font-normal'>{request.categoryName}</span></p>
+                        <p className="font-semibold">Description: <span className='font-normal'>{request.description}</span></p>
 
-        <p className="mt-10 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
-            Request History
-        </p>
+                        <br/>Files:
 
-        {/* Main Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-
-            {/* Show Error, if any */}
-            { error && 
-                <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5bg-red-300">
-                    An error occurred when getting your requests. Please try again later.
-                </p>
-            }
-
-            {requests.length > 0 ? requests.map((request) => (
-                <div key={request.id} className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4">
-                    <p className="font-semibold">Status: <span className='font-normal'>{request.status}</span></p>
-                    <p className="font-semibold">Category: <span className='font-normal'>{request.categoryName}</span></p>
-                    <p className="font-semibold">Description: <span className='font-normal'>{request.description}</span></p>
-
-                    <br/>Files:
-
-                    {request.files.length > 0 && (
-                        <ul className="mt-2 list-disc list-inside">
-                            {request.files.map(file => (
-                                <li key={file.id}>
-                                    <a
-                                        href={`http://localhost:8080${file.downloadUrl}`}
-                                        className="text-blue-600 underline"
-                                    >
-                                        {file.filename}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            )) : (
-                <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
-                    You have no active requests
-                </p>
-            )}
-        </section>
-
-        
-    </div>
+                        {request.files.length > 0 && (
+                            <ul className="mt-2 list-disc list-inside">
+                                {request.files.map(file => (
+                                    <li key={file.id}>
+                                        <a
+                                            href={`http://localhost:8080${file.downloadUrl}`}
+                                            className="text-blue-600 underline"
+                                        >
+                                            {file.filename}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )) : (
+                    <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
+                        You have no active requests
+                    </p>
+                )}
+            </section>
+        </div>
     );
 }

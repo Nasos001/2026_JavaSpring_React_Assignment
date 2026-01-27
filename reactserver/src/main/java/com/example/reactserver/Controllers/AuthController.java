@@ -1,10 +1,12 @@
 package com.example.reactserver.Controllers;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +20,13 @@ import com.example.reactserver.Services.JwtService;
 
 import java.util.Optional;
 
-// Controller ============================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    // Create jwtService object
+    // Properties
     // ----------------------------------------------------------------------------------------------------------------
     private JwtService jwtService;
     private UserRepository userRepository;
@@ -70,6 +73,7 @@ public class AuthController {
 
     // Logout Endpoint
     // ----------------------------------------------------------------------------------------------------------------
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN', 'USER', 'NOT_DETERMINED')")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         // Create Cookie

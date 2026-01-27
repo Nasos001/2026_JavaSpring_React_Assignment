@@ -1,5 +1,7 @@
 package com.example.reactserver.Services;
 
+// Imports 
+// ===============================================================================================================================================
 import java.util.List;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,15 +13,23 @@ import org.springframework.stereotype.Service;
 import com.example.reactserver.Entities.User;
 import com.example.reactserver.Repositories.UserRepository;
 
+// Class
+// ===============================================================================================================================================
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    // Properties
+    // ----------------------------------------------------------------------------------------------------------------
     private final UserRepository userRepository;
 
+    // Constructor
+    // ----------------------------------------------------------------------------------------------------------------
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    // Get User Details
+    // ----------------------------------------------------------------------------------------------------------------
     @Override
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email)

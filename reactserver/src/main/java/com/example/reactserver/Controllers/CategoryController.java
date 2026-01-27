@@ -1,6 +1,7 @@
 package com.example.reactserver.Controllers;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,33 +24,36 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 
-// Main Class ============================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
 
     // Properties
-    // ---------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     private final CategoryRepository categoryRepository;
 
     // Constructor
-    // ---------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public CategoryController(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
-    // Retrieval Endpoint
-    // ---------------------------------------------------------------------------
+    // Get Categories Endpoint
+    // ----------------------------------------------------------------------------------------------------------------
     @GetMapping
     public List<CategoryDTO> getAllCategories() {
-        return categoryRepository.findAll().stream().map(category -> new CategoryDTO(category.getId(),
-                category.getName(), category.getDescription(), category.getPriority().name())).toList();
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> new CategoryDTO(category.getId(),
+                        category.getName(), category.getDescription(), category.getPriority().name()))
+                .toList();
     }
 
     // Update Category Endpoint
-    // ---------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
     @PutMapping
     public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
 
@@ -70,6 +74,7 @@ public class CategoryController {
     }
 
     // Delete Category Endpoint
+    // ----------------------------------------------------------------------------------------------------------------//
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -91,7 +96,6 @@ public class CategoryController {
     // Create Category Endpoint
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
     @PostMapping
     public ResponseEntity<Void> postMethodName(@RequestBody CategoryDTO categoryDTO) {
 

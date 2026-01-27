@@ -91,7 +91,7 @@ export default function Navigation() {
     // -----------------------------------------------------------------------------------------------
     const Logout = async () => {
         try {
-            logout();
+            await logout();
         } catch {
             alert("Something went wrong. Please try again later.");
         }

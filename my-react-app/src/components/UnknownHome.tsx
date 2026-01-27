@@ -19,7 +19,7 @@ export default function UnknownHome() {
   // -----------------------------------------------------------------------------------------------------------
   const Logout = async () => {
         try {
-            logout();
+            await logout();
         } catch {
             setError("Something went wrong. Please try again later.");
         }

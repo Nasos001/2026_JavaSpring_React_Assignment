@@ -2,7 +2,6 @@
 // ===========================================================================================================================================================
 import { useState } from 'react';
 
-
 // Interfaces
 // ===========================================================================================================================================================
 interface Announcement {
@@ -13,34 +12,41 @@ interface Announcement {
 // Main Component
 // ===========================================================================================================================================================
 export default function Announcements() {
-    // States ----------------------------------------------------------------------------------
+    // States 
+    // --------------------------------------------------------------------------------------------------------------------
     const [announcement, setAnnouncement] = useState<Announcement>({title: "", content: ""});
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
 
-    // Handle Announcement ---------------------------------------------------------------------
+    // Handle Announcement 
+    // --------------------------------------------------------------------------------------------------------------------
     const handleAnnouncement = async () => {
-        // Make fetch
-        const res = await fetch("http://localhost:8080/api/announcements", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({title: announcement.title, content: announcement.content})
-        });
+        try {
+            // Make fetch
+            const res = await fetch("http://localhost:8080/api/announcements", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({title: announcement.title, content: announcement.content})
+            });
 
-        // Check Response
-        if (res.ok) {
-            setSuccess(true);
-            setAnnouncement({title: "", content: ""});
-            
-        } else {
-            setError(true);
+            // Check Response
+            if (res.ok) {
+                setSuccess(true);
+                setAnnouncement({title: "", content: ""});
+                
+            } else {
+                setError(true);
+            }
+        } catch(error) {
+            console.error(error);
         }
     }
 
-    // JSX --------------------------------------------------------------------------------------
+    // JSX 
+    // --------------------------------------------------------------------------------------------------------------------
     return(
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 h-screen flex items-center justify-center">
             {/* Show Error, if any */}
@@ -87,6 +93,7 @@ export default function Announcements() {
                         />
                     </div>
 
+                    {/* Submit Button */}
                     <button className="w-3/4 mx-auto block rounded-lg bg-blue-600 py-2.5 text-white text-sm mt-5 font-medium hover:bg-blue-700 transition"
                         type="submit"
                     >

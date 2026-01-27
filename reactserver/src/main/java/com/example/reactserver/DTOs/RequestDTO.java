@@ -1,9 +1,16 @@
 package com.example.reactserver.DTOs;
 
+// Imports
+// ===============================================================================================================================================
 import java.time.LocalDateTime;
 import java.util.List;
 
+// Class 
+// ===============================================================================================================================================
 public class RequestDTO {
+
+    // Properties
+    // -----------------------------------------------------------------------------------------------------------------
     private Integer id;
     private String description;
     private String categoryName;
@@ -14,6 +21,8 @@ public class RequestDTO {
     private LocalDateTime createdAt;
     private List<RequestFileDTO> files;
 
+    // Constructor
+    // -----------------------------------------------------------------------------------------------------------------
     public RequestDTO(Integer id, String description, String categoryName, String status, String comments,
             String actions, Integer technician, LocalDateTime createdAt, List<RequestFileDTO> files) {
         this.id = id;
@@ -27,6 +36,8 @@ public class RequestDTO {
         this.files = files;
     }
 
+    // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

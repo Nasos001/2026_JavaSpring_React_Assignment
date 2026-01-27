@@ -1,5 +1,7 @@
 package com.example.reactserver.Controllers;
 
+// Imports 
+// ===============================================================================================================================================
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+// Class
+// ===============================================================================================================================================
 @RestController
 @RequestMapping("api/users")
 public class UserController {
@@ -68,10 +72,18 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/role")
     public ResponseEntity<Void> updateRole(@RequestBody UpdateRoleRequest request) {
+
+        // Find User
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Set new role
         user.setRole(UserRole.valueOf(request.getRole()));
+
+        // Save the User in DB
         userRepository.save(user);
+
+        // Respond to the Client
         return ResponseEntity.ok().build();
     }
 
@@ -106,11 +118,15 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
 
+        // Check if User exists
         if (!userRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
+        // Delete User
         userRepository.deleteById(id);
+
+        // Respond to the Client
         return ResponseEntity.noContent().build();
     }
 

@@ -1,8 +1,11 @@
 package com.example.reactserver.DTOs;
 
+// Class 
+// ===============================================================================================================================================
 public class RegisterRequest {
 
     // Properties
+    // -----------------------------------------------------------------------------------------------------------------
     String name;
     String surname;
     String country;
@@ -13,6 +16,7 @@ public class RegisterRequest {
     String password;
 
     // Constructors
+    // -----------------------------------------------------------------------------------------------------------------
     public RegisterRequest() {
     }
 
@@ -29,6 +33,7 @@ public class RegisterRequest {
     }
 
     // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public String getName() {
         return name;
     }

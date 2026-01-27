@@ -1,20 +1,21 @@
 package com.example.reactserver.Entities;
 
+// Imports
+// ===============================================================================================================================================
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.example.reactserver.Enumeration.RequestStatus;
 
-// Main Class ============================================================================================================================================
+// Class 
+// ===============================================================================================================================================
 @Entity
 @Table(name = "requests")
 public class Request {
 
     // Properties
-    // -------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -50,7 +51,7 @@ public class Request {
     private LocalDateTime createdAt;
 
     // Constructors
-    // -------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     public Request(String description, Category category) {
         this.description = description;
         this.category = category;
@@ -59,8 +60,8 @@ public class Request {
     public Request() {
     }
 
-    // Getters & Setters
-    // -------------------------------------------------------------------------------------
+    // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public RequestStatus getStatus() {
         return status;
     }

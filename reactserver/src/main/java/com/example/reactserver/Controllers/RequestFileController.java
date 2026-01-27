@@ -1,6 +1,7 @@
 package com.example.reactserver.Controllers;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,25 +18,26 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-// Main Class ============================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @RestController
 @RequestMapping("api/files")
 public class RequestFileController {
 
     // Properties
-    // ---------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     private final RequestFileRepository requestFileRepository;
     private final FileStorageService fileStorageService;
 
     // Constructor
-    // ---------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     public RequestFileController(RequestFileRepository requestFileRepository, FileStorageService fileStorageService) {
         this.requestFileRepository = requestFileRepository;
         this.fileStorageService = fileStorageService;
     }
 
     // Download File Endpoint
-    // ---------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     @GetMapping("/{id}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long id, @CookieValue("authToken") String token) {
 

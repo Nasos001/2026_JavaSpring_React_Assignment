@@ -1,6 +1,7 @@
 package com.example.reactserver.Services;
 
-// Imports ===============================================================================================================================================
+// Imports 
+// ===============================================================================================================================================
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -12,7 +13,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-// Main Class ============================================================================================================================================
+// Class
+// ===============================================================================================================================================
 @Service
 public class FileStorageService {
 

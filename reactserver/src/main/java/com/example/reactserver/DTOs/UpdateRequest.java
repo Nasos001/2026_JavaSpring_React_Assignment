@@ -1,7 +1,11 @@
 package com.example.reactserver.DTOs;
 
+// Class 
+// ===============================================================================================================================================
 public class UpdateRequest {
+
     // Properties
+    // -----------------------------------------------------------------------------------------------------------------
     private Integer id;
     private String status;
     private String actions;
@@ -9,6 +13,7 @@ public class UpdateRequest {
     private Integer technician;
 
     // Constructors
+    // -----------------------------------------------------------------------------------------------------------------
     public UpdateRequest(Integer id, String status, String actions, String comments, Integer technician) {
         this.id = id;
         this.status = status;
@@ -20,7 +25,8 @@ public class UpdateRequest {
     public UpdateRequest() {
     }
 
-    // Setters and Getters
+    // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public Integer getId() {
         return id;
     }

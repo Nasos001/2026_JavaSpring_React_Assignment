@@ -1,5 +1,7 @@
 package com.example.reactserver.Infrastructure;
 
+// Imports
+// ===============================================================================================================================================
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -16,18 +18,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import jakarta.servlet.http.Cookie;
 
+// Class
+// ===============================================================================================================================================
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    // Properties
+    // --------------------------------------------------------------------------------------------
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    // Constructor
+    // --------------------------------------------------------------------------------------------
     public JwtAuthenticationFilter(JwtService jwtService,
             UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
 
+    // Token Extraction
+    // --------------------------------------------------------------------------------------------
     private String extractTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null)
             return null;
@@ -40,6 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
+    // Define Filter
+    // --------------------------------------------------------------------------------------------
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,

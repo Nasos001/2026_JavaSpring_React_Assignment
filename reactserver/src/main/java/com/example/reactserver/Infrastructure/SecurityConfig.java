@@ -1,5 +1,7 @@
 package com.example.reactserver.Infrastructure;
 
+// Imports
+// ===============================================================================================================================================
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -12,26 +14,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.util.List;
 
+// Class
+// ===============================================================================================================================================
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // Properties
+    // --------------------------------------------------------------------------------------------
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // Constructor
+    // --------------------------------------------------------------------------------------------
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    // Password Encoder
+    // --------------------------------------------------------------------------------------------
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // CORS Configuration
+    // --------------------------------------------------------------------------------------------
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -45,6 +56,8 @@ public class SecurityConfig {
         return source;
     }
 
+    // Filter
+    // --------------------------------------------------------------------------------------------
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -55,6 +68,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login", "/api/auth/register").anonymous()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().authenticated());
