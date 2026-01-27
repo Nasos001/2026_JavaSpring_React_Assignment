@@ -63,7 +63,7 @@ public class AuthController {
                 System.out.println("Token: " + token);
 
                 response.addCookie(cookie);
-                return ResponseEntity.ok(new AuthResponse("Login successful"));
+                return ResponseEntity.ok(new AuthResponse("Login successful", user.getRole().name()));
             }
         }
 

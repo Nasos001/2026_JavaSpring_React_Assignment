@@ -48,7 +48,7 @@ public class AnnouncementController {
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN', 'USER')")
     @GetMapping
-    public List<Announcement> getMethodName() {
+    public List<Announcement> getAnnouncements() {
 
         return announcementRepository.findAll();
     }

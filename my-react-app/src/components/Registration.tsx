@@ -50,18 +50,40 @@ export default function Register() {
         password: "",
     });
 
+    const isFormValid = 
+        form.name.trim() &&
+        form.surname.trim() &&
+        form.username.trim() &&
+        form.email.trim() &&
+        form.password.trim() &&
+        form.country &&
+        form.city &&
+        form.address;
+
+
     const navigate = useNavigate();
 
     // Retrieve Countries and Cities
     // ---------------------------------------------------------------------------------------------------------------
     useEffect(() => {
         const fetchCountriesAndCities = async () => {
-            const res = await fetch("https://countriesnow.space/api/v0.1/countries");
+            try {
+                // Make Fetch
+                const res = await fetch("https://countriesnow.space/api/v0.1/countries");
 
-            const data = await res.json() as CountriesAndCities;
+                if (!res.ok) {
+                    return setError("Something went wrong, please try again later.");
+                }
 
-            setCountriesData(data.data);
-            setCountries(data.data.map(c => c.country));
+                // Get Data
+                const data = await res.json() as CountriesAndCities;
+                setCountriesData(data.data);
+                setCountries(data.data.map(c => c.country));
+            } catch(error) {
+                setSuccess(false);
+                console.error(error);
+                setError("Something went wrong, please try again later.");
+            }
 
         }
 
@@ -96,12 +118,13 @@ export default function Register() {
     // Handle Submit Form
     // ---------------------------------------------------------------------------------------------------------------
     const handleSubmit = async (e: React.FormEvent) => {
+        // Indicate Loading
         e.preventDefault();
         setError(null);
         setLoading(true);
 
         try {
-            // Make call
+            // Make Fetch
             const res = await fetch("http://localhost:8080/api/auth/register", {
                 method: "POST",
                 headers: {
@@ -112,19 +135,19 @@ export default function Register() {
 
             // Check Response
             if (!res.ok) {
+                setSuccess(false);
                 const msg = await res.text();
-                throw new Error(msg || "Registration failed");
+                console.error(msg);
+                return setError(msg || "Something went wrong, please try again later.");
             }
 
             setSuccess(true);
             setTimeout(() => navigate("/login"), 4000);
         
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError(String(err));
-            }
+        } catch (error) {
+            setSuccess(false);
+            console.error(error);
+            setError("Something went wrong, please try again later.");
         } finally {
         setLoading(false);
         }
@@ -267,7 +290,7 @@ export default function Register() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !isFormValid}
                         className="w-full rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
                     >
                         {loading ? "Creating account..." : "Register"}

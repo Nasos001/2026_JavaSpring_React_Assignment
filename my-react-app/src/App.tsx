@@ -2,7 +2,7 @@
 // ===========================================================================================================================================================
 
 // Configuration
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { LoggedInRoute } from './AuthorizationRoutes/LoggedInRoute.tsx';
 import { PublicRoute } from './AuthorizationRoutes/PublicRoute.tsx';
 import Navigation from './components/Navigation.tsx';
@@ -33,9 +33,10 @@ export default function App() {
   return (
     <div>
       {/* Router ------------------------------------------------------------------------------------------------------*/}
-      <BrowserRouter>
+      
         {/* Navigation Header*/}
         <Navigation />
+
         <Routes>
           <Route path='/login' element={
             <PublicRoute>
@@ -68,7 +69,7 @@ export default function App() {
             </LoggedInRoute>
           }/>
 
-          <Route path="/new request" element={
+          <Route path="/new-request" element={
             <LoggedInRoute allowedRoles={["USER"]}>
               <NewRequest />
             </LoggedInRoute>
@@ -86,7 +87,7 @@ export default function App() {
             </LoggedInRoute>
           }/>
 
-          <Route path='/registration requests' element={
+          <Route path='/registration-requests' element={
             <LoggedInRoute allowedRoles={["ADMIN"]}>
               <Registration_Requests />
             </LoggedInRoute>
@@ -116,7 +117,6 @@ export default function App() {
             </LoggedInRoute>
           }/>
         </Routes>
-      </BrowserRouter>
 
       {/* Footer ----------------------------------------------------------------------------------------------------------*/}
       <footer className="bg-gray-800 text-gray-300 py-12">

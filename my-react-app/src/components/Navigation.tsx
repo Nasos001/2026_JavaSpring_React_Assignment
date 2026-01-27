@@ -40,8 +40,8 @@ export default function Navigation() {
         { label: "Registrations", action: () => navigate("/registration-requests") },
         { label: "Requests", action: () => navigate("/requests") },
         { label: "Announcements", action: () => navigate("/announcements") },
-        { label: "Categories Management", action: () => navigate("/categories") },
-        { label: "Users Management", action: () => navigate("/users") }
+        { label: "Categories", action: () => navigate("/categories") },
+        { label: "Users", action: () => navigate("/users") }
     ];
 
     // Find Menu based on Role
@@ -54,14 +54,14 @@ export default function Navigation() {
 
     // Render Navigation
     // -----------------------------------------------------------------------------------------------
-    const renderMenu = (isMobile = false) => (
+    const renderMenu = (isMobile: boolean) => (
 
         // Render CSS based on Device
-        <div className={isMobile ? "space-y-1" : "flex gap-8"}>
+        <div className={` ${isMobile ? "space-y-1 p-1" : "flex md:gap-3 lg:gap-8"}`}>
 
             {/* Render each item */}
             {menu.map(item => (
-                <button className="text-gray-700 hover:text-blue-600 font-medium"
+                <button className={`text-gray-700 hover:text-blue-600 hover:bg-indigo-100 rounded-xl w-full text-left p-1 font-semibold md:text-md lg:text-lg ${isMobile && "block"}`}
                     key={item.label}
                     onClick={() => {
                         item.action();
@@ -79,7 +79,7 @@ export default function Navigation() {
                         await Logout();
                         setHamburgerOpen(false);
                     }}
-                    className="text-gray-700 hover:text-blue-600 font-medium"
+                    className={`text-gray-700 hover:text-blue-600 hover:bg-indigo-100 rounded-xl w-full text-left p-1 font-semibold  md:text-sm lg:text-lg ${isMobile && "block"}`}
                 >
                     Logout
                 </button>
@@ -92,15 +92,15 @@ export default function Navigation() {
     const Logout = async () => {
         try {
             await logout();
-        } catch {
-            alert("Something went wrong. Please try again later.");
+        } catch(error) {
+            console.error(error);
         }
     }
 
     // JSX 
     // -----------------------------------------------------------------------------------------------
     return(
-    <nav className="bg-white shadow-sm sticky top-0">
+    <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           
             {/* Logo */}
@@ -110,7 +110,7 @@ export default function Navigation() {
         
             {/* Desktop */}
             <div className="hidden md:flex">
-                {renderMenu()}
+                {renderMenu(false)}
             </div>
 
             {/* Mobile menu button */}

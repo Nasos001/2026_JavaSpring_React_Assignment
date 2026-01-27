@@ -36,10 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading: true,
   });
 
+
   // Fetch Login status
   // -----------------------------------------------------------------------------------------------
   useEffect(() => {
-    fetch("/api/auth/check", { credentials: "include" })
+    fetch("http://localhost:8080/api/auth/check", { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) {
@@ -82,8 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading: false,
       });
 
-      // Redirect to Home
-      navigate("/home");
+      // Then navigate
+      if (data.role === "NOT_DETERMINED") {
+        navigate("/unknownHome");
+      } else {
+        navigate("/home");
+      }
     } catch (error) {
       console.error("Login failed:", error);
 
@@ -93,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading: false,
       });
 
-      throw error; // allows UI to show message if desired
+      throw error; 
     }
   };
 

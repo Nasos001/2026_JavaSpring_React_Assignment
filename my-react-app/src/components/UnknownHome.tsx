@@ -1,6 +1,5 @@
 // Imports 
 // ==========================================================================================================================================
-import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useAuth } from '../Contexts/AuthContext';
 
@@ -11,7 +10,6 @@ export default function UnknownHome() {
   
   // States and Variables
   // -----------------------------------------------------------------------------------------------------------
-  const [error, setError] = useState<string | null>(null);
   const { logout } = useAuth();
 
 
@@ -19,9 +17,9 @@ export default function UnknownHome() {
   // -----------------------------------------------------------------------------------------------------------
   const Logout = async () => {
         try {
-            await logout();
-        } catch {
-            setError("Something went wrong. Please try again later.");
+          await logout();
+        } catch(error) {
+          console.error(error);
         }
     }
 
@@ -39,13 +37,6 @@ export default function UnknownHome() {
           </span>
           Assignment from Administrator
         </h1>
-
-        {/* Possible Error */}
-        { error != null && 
-        <p className={"max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 bg-red-300"}>
-          {error ? "Your Request has been submitted!!!" : "Something went wrong, please try again."}
-        </p>
-        }
 
         {/* Request */}
         <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">

@@ -34,6 +34,7 @@ export default function Requests() {
     // States & Var 
     // ------------------------------------------------------------------------------------------------------------------
     const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [requests, setRequests] = useState<Request[]>([]);
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [success, setSuccess] = useState<boolean | null>(null);
@@ -45,12 +46,17 @@ export default function Requests() {
     // ------------------------------------------------------------------------------------------------------------------
     useEffect(() => {
         const fetchRequests = async () => {
+            setLoading(true);
+
             try {
                 // Make fetch
-                const res = await fetch("http://localhost:8080/api/requests?All=true", {credentials: "include"});
+                const res = await fetch("http://localhost:8080/api/requests?all=true", {credentials: "include"});
 
                 // Check for Error
-                if (!res.ok) return setError(true);
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error("Error when getting requests: " + msg);
+                }
 
                 // Get data
                 const data: Request[] = await res.json();
@@ -64,6 +70,9 @@ export default function Requests() {
                 setSelectedRequests(initialRequests);
             } catch(error) {
                 console.error(error);
+                setError(true);
+            } finally {
+                setLoading(false);
             }
         }
 
@@ -79,13 +88,17 @@ export default function Requests() {
                 const res = await fetch("http://localhost:8080/api/users?role=TECHNICIAN", {credentials: "include"});
 
                 // Check for Error
-                if (!res.ok) return setError(true);
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error("Error when getting technicians: " + msg);
+                }
 
                 // Get data
                 const data: Technician[] = await res.json();
                 setTechnicians(data);
             } catch(error) {
                 console.error(error);
+                setError(true);
             }
         }
 
@@ -113,10 +126,12 @@ export default function Requests() {
             if (res.ok) {
                 setSuccess(true);
             } else {
-                setError(true);
+                const msg = await res.text();
+                throw new Error("Error when updating the Request:" + msg);
             }
         } catch(error) {
             console.error(error);
+            setError(true);
         }
     }
 
@@ -147,8 +162,16 @@ export default function Requests() {
                     </p>
                 }
 
+                { loading && <p className="text-center">Loading requests...</p> }
+
+                { !loading && !error && requests.length === 0 && (
+                    <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
+                        There are no active requests
+                    </p>
+                )}
+
                 {/* Display Requests */}
-                {requests.length > 0 ? requests.map((request) => {
+                {requests.length > 0 && requests.map((request) => {
                     const [status, actions, comments, technician] = selectedRequests[request.id] || ["", "", "", 0];
 
                     return(
@@ -157,14 +180,14 @@ export default function Requests() {
                         <p className="font-semibold">ID: <span className='font-normal'>{request.id}</span></p>
                         <p className="font-semibold">Category: <span className='font-normal'>{request.categoryName}</span></p>
                         <p className="font-semibold">Description: <span className='font-normal'>{request.description}</span></p>
-                        <p className="font-semibold">Created at: 
+                        <p className="font-semibold">Created at:{" "} 
                             <span className='font-normal'>
                                 {new Date(request.createdAt).toLocaleString()}
                             </span>
-                        </p>
+                        </p> <br/>
                         
                         {/* Files */}
-                        <br/>Files:
+                        <p className="font-semibold">Files:</p>
                         {request.files.length > 0 && (
                             <ul className="mt-2 list-disc list-inside">
                                 {request.files.map(file => (
@@ -178,35 +201,43 @@ export default function Requests() {
                                     </li>
                                 ))}
                             </ul>
-                        )}
+                        )} <br/>
 
                         {/* Statuses */}
-                        <p>Status:</p>
-                        <select value={status} onChange={(e) => setSelectedRequests(prev => ({
-                            ...prev,
-                            [request.id]: [e.target.value, actions, comments, technician]
-                        }))} >
-                            {statuses.map((status) => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
+                        <div className='grid grid-cols-5'>
+                            <p className="font-semibold">Status:</p>
+                            <select className='bg-indigo-100 rounded p-1'
+                                value={status} 
+                                onChange={(e) => setSelectedRequests(prev => ({
+                                ...prev,
+                                [request.id]: [e.target.value, actions, comments, technician]
+                            }))} >
+                                {statuses.map((status) => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                        </div>
 
                         {/* Technicians */}
-                        <p>Technician:</p>
-                        <select value={technician ?? 0} onChange={(e) => setSelectedRequests(prev => ({
-                            ...prev,
-                            [request.id]: [status, actions, comments, Number(e.target.value) == 0 ? null : Number(e.target.value)]
-                        }))} >
-                            <option value={0}>Select a Technician</option>
-                            {technicians.map((technician) => (
-                                <option value={technician.id}>{technician.username}</option>
-                            ))}
-                        </select>
+                        <div className='grid grid-cols-5 mt-3'>
+                            <p className="font-semibold">Technician:</p>
+                            <select className='bg-indigo-100 rounded p-1'
+                                value={technician ?? 0} 
+                                onChange={(e) => setSelectedRequests(prev => ({
+                                    ...prev,
+                                    [request.id]: [status, actions, comments, Number(e.target.value) == 0 ? null : Number(e.target.value)]
+                                }))} 
+                            >
+                                <option value={0}>Select a Technician</option>
+                                {technicians.map((technician) => (
+                                    <option value={technician.id}>{technician.username}</option>
+                                ))}
+                            </select>
+                        </div>
 
                         {/* Actions */}
-                        <p>Actions:</p>
-                        <input
-                            type="text"
+                        <p className="font-semibold mt-3">Actions:</p>
+                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
                             value={actions}
                             onChange={(e) => setSelectedRequests(prev => ({
                             ...prev,
@@ -214,9 +245,8 @@ export default function Requests() {
                         }))} />
                         
                         {/* Comments */}
-                        <p>Comments:</p>
-                        <input
-                            type="text"
+                        <p className="font-semibold mt-3">Comments:</p>
+                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
                             value={comments}
                             onChange={(e) => setSelectedRequests(prev => ({
                             ...prev,
@@ -225,17 +255,15 @@ export default function Requests() {
 
                         {/* Submit Button */}
                         <button
-                            className="bg-green-600 text-white py-1 rounded hover:bg-green-700"
-                            onClick={() => updateRequest(request.id)}
+                            className="bg-green-600 text-white rounded hover:bg-green-700 flex items-center mx-auto py-2 px-15 mt-3"
+                            onClick={() => {
+                                updateRequest(request.id); 
+                                window.scrollTo({ top: 0, behavior: "smooth" })}}
                         >
                             Confirm
                         </button>
                     </div>
-                )}) : (
-                    <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
-                        You have no active requests
-                    </p>
-                )}
+                )})}
             </section>
         </div>
     );

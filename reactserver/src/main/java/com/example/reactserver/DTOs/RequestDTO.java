@@ -21,7 +21,7 @@ public class RequestDTO {
     private LocalDateTime createdAt;
     private List<RequestFileDTO> files;
 
-    // Constructor
+    // Constructors
     // -----------------------------------------------------------------------------------------------------------------
     public RequestDTO(Integer id, String description, String categoryName, String status, String comments,
             String actions, Integer technician, LocalDateTime createdAt, List<RequestFileDTO> files) {

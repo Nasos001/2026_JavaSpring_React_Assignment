@@ -11,19 +11,23 @@ export default function LoginPage() {
   // ---------------------------------------------------------------------------------------------------------------
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<boolean | null>(false);
   const {login} = useAuth();
 
   const navigate = useNavigate();
 
   // Handle Login 
   // ---------------------------------------------------------------------------------------------------------------
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(false);
+
     try {
       await login(email, password);
     } catch {
-      alert("Invalid email or password");
+      setError(true);
     }
-  }
+  };
 
   // JSX 
   // ---------------------------------------------------------------------------------------------------------------
@@ -34,6 +38,13 @@ export default function LoginPage() {
         {/* Header */}
         <h2 className="text-2xl font-semibold text-center mb-6">Log In</h2>
 
+        {/* Error Message, if any */}
+        {error && (
+        <div className="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-700">
+          Invalid email or password
+        </div>
+        )}
+
         <form className="space-y-4" onSubmit={handleLogin}>
           {/* Email */}
           <div>
@@ -43,7 +54,7 @@ export default function LoginPage() {
             <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {setEmail(e.target.value); setError(null);}}
               placeholder="you@example.com"
               required
             />
@@ -57,7 +68,7 @@ export default function LoginPage() {
             <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {setPassword(e.target.value); setError(null);}}
               placeholder="Enter your password"
               required
             />

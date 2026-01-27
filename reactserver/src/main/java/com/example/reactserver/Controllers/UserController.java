@@ -10,6 +10,7 @@ import com.example.reactserver.DTOs.UpdateRoleRequest;
 import com.example.reactserver.DTOs.UserDTO;
 import com.example.reactserver.Entities.User;
 import com.example.reactserver.Enumeration.UserRole;
+import com.example.reactserver.Repositories.RequestRepository;
 import com.example.reactserver.Repositories.UserRepository;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,28 +36,41 @@ public class UserController {
     // Properties
     // ----------------------------------------------------------------------------------------------------------------
     private UserRepository userRepository;
+    private RequestRepository requestRepository;
 
     // Constructor
     // ----------------------------------------------------------------------------------------------------------------
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, RequestRepository requestRepository) {
         this.userRepository = userRepository;
+        this.requestRepository = requestRepository;
     }
 
     // Get Users Endpoint
     // ----------------------------------------------------------------------------------------------------------------
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECHNICIAN')")
     @GetMapping
-    public List<UserDTO> getUsers(@RequestParam(required = false) String role,
+    public List<UserDTO> getUsers(
+            Authentication authentication,
+            @RequestParam(required = false) String role,
             @RequestParam(required = false) Integer id) {
 
-        // Check for specific ID
+        boolean isTechnician = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TECHNICIAN"));
+
+        // Technicians may NOT fetch by ID
+        if (isTechnician && id != null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Technicians may only query users by role");
+        }
+
+        // Admin-only: fetch by ID
         if (id != null) {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             return List.of(new UserDTO(user));
         }
 
-        // Check for specific role
+        // Both Admin & Technician: fetch by role
         if (role != null) {
             return userRepository.findByRole(UserRole.valueOf(role))
                     .stream()
@@ -63,8 +78,9 @@ public class UserController {
                     .toList();
         }
 
-        // Neither id nor role provided — return 400 Bad Request
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Either 'id' or 'role' must be provided");
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Either 'role' or 'id' must be provided");
     }
 
     // Update User Role Endpoint
@@ -118,16 +134,28 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
 
-        // Check if User exists
-        if (!userRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        // 1️⃣ Find the user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // 2️⃣ Check if user is ADMIN
+        if (user.getRole() == UserRole.ADMIN) {
+            // Count how many admins exist
+            long adminCount = userRepository.countByRole(UserRole.ADMIN);
+
+            if (adminCount <= 1) {
+                // Cannot delete the last remaining admin
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Cannot delete the last remaining ADMIN");
+            }
         }
 
-        // Delete User
-        userRepository.deleteById(id);
+        // 3️⃣ Delete all requests associated with this user
+        requestRepository.deleteByUser(user); // You'll need this method in RequestRepository
 
-        // Respond to the Client
+        // 4️⃣ Delete the user
+        userRepository.delete(user);
+
         return ResponseEntity.noContent().build();
     }
-
 }

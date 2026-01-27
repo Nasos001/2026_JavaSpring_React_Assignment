@@ -5,9 +5,9 @@ package com.example.reactserver.Enumeration;
 public enum Priority {
     // Objects
     // -----------------------------------------------------------------------------
-    LOW("Low"),
+    HIGH("High"),
     MEDIUM("Medium"),
-    HIGH("High");
+    LOW("Low");
 
     // Properties
     // -----------------------------------------------------------------------------

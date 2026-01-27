@@ -1,5 +1,7 @@
 package com.example.reactserver.Entities;
 
+import java.time.LocalDateTime;
+
 // Imports 
 // ===============================================================================================================================================
 import jakarta.persistence.Column;
@@ -26,6 +28,9 @@ public class Announcement {
 
     @Column(nullable = false)
     private String content;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     // Constructor
     // -----------------------------------------------------------------------------------------------------------------
@@ -61,5 +66,13 @@ public class Announcement {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

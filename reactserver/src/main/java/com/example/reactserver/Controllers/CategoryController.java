@@ -8,8 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.reactserver.DTOs.CategoryDTO;
 import com.example.reactserver.Repositories.CategoryRepository;
+import com.example.reactserver.Repositories.RequestRepository;
 import com.example.reactserver.Entities.Category;
+import com.example.reactserver.Entities.Request;
 import com.example.reactserver.Enumeration.Priority;
+import com.example.reactserver.Enumeration.RequestStatus;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -33,11 +36,13 @@ public class CategoryController {
     // Properties
     // ----------------------------------------------------------------------------------------------------------------
     private final CategoryRepository categoryRepository;
+    private final RequestRepository requestRepository;
 
     // Constructor
     // ----------------------------------------------------------------------------------------------------------------
-    public CategoryController(CategoryRepository categoryRepository) {
+    public CategoryController(CategoryRepository categoryRepository, RequestRepository requestRepository) {
         this.categoryRepository = categoryRepository;
+        this.requestRepository = requestRepository;
     }
 
     // Get Categories Endpoint
@@ -81,15 +86,30 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
 
-        // Check if the category exists
-        if (!categoryRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        // Find category
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Find requests that reference this category
+        List<Request> requestsUsingCategory = requestRepository.findByCategory(category);
+
+        // If there are requests, check if they are all COMPLETED
+        boolean hasNonCompleted = requestsUsingCategory.stream()
+                .anyMatch(r -> r.getStatus() != RequestStatus.COMPLETED);
+
+        if (hasNonCompleted) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Cannot delete category: it is used in requests that are not completed");
         }
 
-        // Delete the Category
-        categoryRepository.deleteById(id);
+        // If all requests are completed, optionally delete them (cascade)
+        if (!requestsUsingCategory.isEmpty()) {
+            requestRepository.deleteAll(requestsUsingCategory);
+        }
 
-        // Respond to the Client
+        // Delete the category
+        categoryRepository.delete(category);
+
         return ResponseEntity.noContent().build();
     }
 

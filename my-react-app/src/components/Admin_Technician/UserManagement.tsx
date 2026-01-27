@@ -39,17 +39,32 @@ export default function UserManagement() {
     const [search, setSearch] = useState<number>(0);
     const [openNew, setOpenNew] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
     const [user, setUser] = useState<Partial<User>>({});
 
     const [password, setPassword] = useState("");
     const [newUser, setNewUser] = useState<Partial<User>>({});
 
-    const [success, setSuccess] = useState<boolean | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     
 
     const [countriesData, setCountriesData] = useState<Countries[]>([]);
     const [countries, setCountries] = useState<string[]>([]);
+
+    const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const isFormValid = 
+    newUser.name?.trim() &&
+    newUser.surname?.trim() &&
+    newUser.username?.trim() &&
+    newUser.email?.trim() &&
+    newUser.country &&
+    newUser.city &&
+    newUser.address &&
+    password.trim();
+
 
     // Variables
     // ------------------------------------------------------------------------------------------------------------------
@@ -87,7 +102,7 @@ export default function UserManagement() {
                 const res = await fetch("https://countriesnow.space/api/v0.1/countries");
 
                 // Check Response
-                if (!res.ok) return setError(true);
+                if (!res.ok) throw new Error("Error when fetching countries and their cities");
 
                 // Get data
                 const data = await res.json() as CountriesAndCities;
@@ -95,6 +110,7 @@ export default function UserManagement() {
                 setCountries(data.data.map(c => c.country));
             } catch(error) {
                 console.error(error);
+                setMessage({type: "error", text: "Countries and Cities could not be retrieved. Please try again later"});
             }
         };
 
@@ -109,13 +125,14 @@ export default function UserManagement() {
             const res = await fetch(`http://localhost:8080/api/users?id=${search}`, {credentials: "include"});
 
             // Check Response
-            if (!res.ok) return setError(true);
+            if (!res.ok) throw new Error("Error when getting the User");
 
             // Get data
             const data: User[] = await res.json();
             setUser(data[0]);
         } catch(error) {
             console.error(error);
+            setMessage({type: "error", text: "User doesn't exist"});
         }
     };
 
@@ -147,13 +164,16 @@ export default function UserManagement() {
 
             // Check Response
             if (res.ok) {
-                setSuccess(true);
-                setLoading(false);
+                setMessage(null);
+                setSuccess("Successfully registered the User!");
             } else {
-                setError(true);
+                throw new Error("Error when creating a user");
             }
         } catch(error) {
             console.error(error);
+            setMessage({type: "error", text: "Registration failed. Please try again later"});
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -182,12 +202,14 @@ export default function UserManagement() {
 
             // Check Response
             if (res.ok) {
-                setSuccess(true);
+                setMessage(null);
+                setSuccess("Successfully updated the User's information!");
             } else {
-                setError(true);
+                throw new Error("Error when updating the User");
             }
         } catch(error) {
             console.error(error);
+            setMessage({type: "error", text: "Update failed. Please try again later."});
         }
     }
 
@@ -204,12 +226,14 @@ export default function UserManagement() {
             // Check Response
             if (res.ok) {
                 setUser({});
-                setSuccess(true);
+                setMessage(null);
+                setSuccess("Successfully deleted the User!");
             } else {
-                setError(true);
+                throw new Error("Error when deleting a User");
             }
         } catch(error) {
             console.error(error);
+            setMessage({type: "error", text: "Deletion failed. Please try again later."});
         }
     }
 
@@ -237,7 +261,11 @@ export default function UserManagement() {
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-22">
 
                 {/* Error Message */}
-                {error && <p className="rounded-lg mx-auto p-3 text-lg mb-5 bg-red-300">An error occurred. Please try again.</p>}
+                { message && 
+                <p className={`max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 ${message.type === 'success' ? 'bg-green-300' : 'bg-red-300'}`}>
+                    {message.text}
+                </p>
+                }
 
                 {/* Success Message */}
                 {success && <p className="rounded-lg mx-auto p-3 text-lg mb-5 bg-green-300">Success!</p>}
@@ -293,7 +321,7 @@ export default function UserManagement() {
                             <input className="border-gray-500 border rounded w-full p-0.5" name="address" value={newUser.address} onChange={handleNewUserChange} required />
 
                             {/* Submit Button */}
-                            <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50">
+                            <button type="submit" disabled={loading || !isFormValid} className="w-full rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50">
                                 {loading ? "Creating account..." : "Register"}
                             </button>
 
@@ -307,8 +335,8 @@ export default function UserManagement() {
 
                 {/* Search Form */}
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                    <input type="number" className="border border-gray-500 rounded p-2" value={search} onChange={(e) => setSearch(Number(e.target.value))} />
-                    <button type="button" className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700" onClick={() => fetchUser()}>
+                    <input type="number" className="border border-gray-500 rounded p-2" value={search} onChange={(e) => {setSearch(Number(e.target.value)); setMessage(null)}} />
+                    <button type="button" className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700" onClick={() => {fetchUser(); setUser({})}}>
                         Search
                     </button>
                 </div>
@@ -358,10 +386,16 @@ export default function UserManagement() {
 
                         {/* Options */}
                         <div className="grid grid-cols-2 gap-2">
-                            <button className="bg-green-600 text-white rounded p-2 hover:bg-green-700" onClick={() => updateUser(user.id!)}>
-                                Confirm
+                            <button className="bg-green-600 text-white rounded p-2 hover:bg-green-700" onClick={() => {
+                                updateUser(user.id!); 
+                                window.scrollTo({ top: 0, behavior: "smooth" })}}
+                            >
+                                Update
                             </button>
-                            <button className="bg-red-600 text-white rounded p-2 hover:bg-red-700" onClick={() => deleteUser(user.id!)}>
+                            <button className="bg-red-600 text-white rounded p-2 hover:bg-red-700" onClick={() => {
+                                deleteUser(user.id!); 
+                                window.scrollTo({ top: 0, behavior: "smooth" })}}
+                            >
                                 Delete
                             </button>
                         </div>

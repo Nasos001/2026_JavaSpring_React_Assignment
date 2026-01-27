@@ -18,9 +18,11 @@ export default function CategoriesManagement() {
 
     // States & Variables
     // ---------------------------------------------------------------------------------------------------------
-    const [error, setError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState<boolean | null>(null);
     const [openNew, setOpenNew] = useState(false);
+
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<Record<number, [string, string, string]>>({});
 
@@ -33,13 +35,19 @@ export default function CategoriesManagement() {
     // Retrieve Categories 
     // ---------------------------------------------------------------------------------------------------------
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchCategories = async () => {
+
+            setLoading(true);
+
             try {
                 // Make fetch
                 const res = await fetch("http://localhost:8080/api/categories", {credentials: "include"});
 
                 // Check for Error
-                if (!res.ok) return setError(true);
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error("Error occurred when fetching categories:" + msg);
+                };
 
                 // Get data
                 const data: Category[] = await res.json();
@@ -53,14 +61,25 @@ export default function CategoriesManagement() {
                 setSelectedCategories(initialCategories);
             } catch(error) {
                 console.error(error);
+                setSuccess(false);
+                setError("Categories could not be retrieved");
+            } finally {
+                setLoading(false);
             }
         }
 
-        fetchUsers();
+        fetchCategories();
     }, [])
 
-    // Create Category ---------------------------------------------------------------------
+    // Create Category 
+    // ---------------------------------------------------------------------------------------------------------
     async function createCategory() {
+        // Check fields
+        if (!name || !description || !priority) {
+            setError("Please complete the form");
+            return;
+        }
+
         try {
             // Make fetch
             const res = await fetch("http://localhost:8080/api/categories", {
@@ -76,15 +95,19 @@ export default function CategoriesManagement() {
             if (res.ok) {
                 setSuccess(true);
             } else {
-                setError(true);
+                const msg = await res.text();
+                throw new Error("Error occurred when creating the category:" + msg);
             }
         } catch(error) {
             console.error(error);
+            setSuccess(false);
+            setError("An error occurred when creating the Category.");
         }
         
     }
 
-    // Update Category ----------------------------------------------------------------------
+    // Update Category 
+    // ---------------------------------------------------------------------------------------------------------
     async function updateCategory(id: number) {
         try {
             // Get Category inputs
@@ -104,35 +127,42 @@ export default function CategoriesManagement() {
             if (res.ok) {
                 setSuccess(true);
             } else {
-                setError(true);
+                const msg = await res.text();
+                throw new Error("Error occurred when updating the category:" + msg);
             }
         } catch(error) {
             console.error(error);
+            setSuccess(false);
+            setError("An error occurred when updating the category.");
         }
     }
 
-    // Handle Delete ---------------------------------------------------------------------------
+    // Delete Category 
+    // ---------------------------------------------------------------------------------------------------------
     async function deleteCategory(id: number) {
         try {
-            // Make fetch
             const res = await fetch(`http://localhost:8080/api/categories/${id}`, {
-                method: "DELETE",
-                credentials: "include",
+            method: "DELETE",
+            credentials: "include",
             });
-            
+
             if (res.ok) {
-                // Remove the category from the list
-                setCategories(prev => prev.filter(category => category.id !== id));
-                setSuccess(true);
+            setCategories(prev => prev.filter(c => c.id !== id));
+            setSuccess(true);
             } else {
-                setError(true);
+            const msg = await res.text();
+            throw new Error(msg || "Error deleting category. It might be in use by a Request.");
             }
-        } catch(error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
+            setSuccess(false);
+            setError(err instanceof Error ? err.message : "Unknown error");
         }
     }
 
-    // JSX --------------------------------------------------------------------------------------
+
+    // JSX 
+    // ---------------------------------------------------------------------------------------------------------
     return(
         <div className="min-h-screen bg-white">
             {/* Header */}
@@ -146,7 +176,7 @@ export default function CategoriesManagement() {
                 {/* Show Error, if any */}
                 { error && 
                     <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 bg-red-300">
-                        An error occurred when getting your requests. Please try again later.
+                        {error}
                     </p>
                 }
 
@@ -157,14 +187,22 @@ export default function CategoriesManagement() {
                     </p>
                 }
 
+                { loading && <p className="text-center">Loading Categories...</p> }
+
+                { !loading && !error && categories.length === 0 && (
+                    <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
+                        There are no categories
+                    </p>
+                )}
+
                 {!openNew ? 
-                <div className="border-b-blue-800 bg-blue-300 rounded p-4 mb-4 flex flex-1 gap-5 hover:cursor-pointer"
+                <div className="border-b-blue-800 bg-blue-400 rounded p-4 mb-4 flex flex-1 gap-5 hover:cursor-pointer"
                     onClick={() => setOpenNew(true)}
                 >
                     <Plus/> Create New Category
                 </div>
                 :
-                <div className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4">
+                <div className="border-b-blue-800 bg-blue-400 rounded p-4 mb-4">
 
                             {/* Name */}
                             <p className="font-semibold">Name:</p>
@@ -172,7 +210,7 @@ export default function CategoriesManagement() {
                                 type="text"
                                 value={name}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {setName(e.target.value); setError(null)}}
                             />
 
                             {/* Description */}
@@ -181,7 +219,7 @@ export default function CategoriesManagement() {
                                 type="text"
                                 value={description}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setDescription(e.target.value)}
+                                onChange={(e) => {setDescription(e.target.value); setError(null)}}
                             />
 
                             {/* Priority */}
@@ -189,7 +227,7 @@ export default function CategoriesManagement() {
                             <select
                                 value={priority}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setPriority(e.target.value)}
+                                onChange={(e) => {setPriority(e.target.value); setError(null)}}
                             >
                                 {priorities.map(p => (
                                     <option key={p} value={p}>{p}</option>
@@ -199,14 +237,14 @@ export default function CategoriesManagement() {
                             <div className='grid grid-cols-2 gap-2'>
                                 <button
                                     className="bg-green-600 text-white py-1 rounded hover:bg-green-700"
-                                    onClick={() => createCategory()}
+                                    onClick={() => {createCategory(); setError(null)}}
                                 >
                                     Create
                                 </button>
 
                                 <button
                                     className="bg-red-600 text-white py-1 rounded hover:bg-red-700"
-                                    onClick={() => setOpenNew(false)}
+                                    onClick={() => {setOpenNew(false); setError(null)}}
                                 >
                                     Discard
                                 </button>
@@ -215,7 +253,7 @@ export default function CategoriesManagement() {
                 }
 
                 {/* Display Categories */}
-                {categories.length > 0 ? categories.map((category) => {
+                {categories.length > 0 && categories.map((category) => {
                     {/* Get properties */}
                     const [name, description, priority] = selectedCategories[category.id] || ["", "", ""];
 
@@ -229,10 +267,10 @@ export default function CategoriesManagement() {
                                 type="text"
                                 value={name}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setSelectedCategories(prev => ({
+                                onChange={(e) => {setSelectedCategories(prev => ({
                                     ...prev,
                                     [category.id]: [e.target.value, description, priority]
-                                }))}
+                                })); setError(null)}}
                             />
 
                             {/* Description */}
@@ -241,10 +279,10 @@ export default function CategoriesManagement() {
                                 type="text"
                                 value={description}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setSelectedCategories(prev => ({
+                                onChange={(e) => {setSelectedCategories(prev => ({
                                     ...prev,
                                     [category.id]: [name, e.target.value, priority]
-                                }))}
+                                })); setError(null)}}
                             />
 
                             {/* Priority */}
@@ -252,10 +290,10 @@ export default function CategoriesManagement() {
                             <select
                                 value={priority}
                                 className="border border-gray-500 rounded w-full p-1 mb-2"
-                                onChange={(e) => setSelectedCategories(prev => ({
+                                onChange={(e) => {setSelectedCategories(prev => ({
                                     ...prev,
                                     [category.id]: [name, description, e.target.value]
-                                }))}
+                                })); setError(null)}}
                             >
                                 {priorities.map(p => (
                                     <option key={p} value={p}>{p}</option>
@@ -266,25 +304,27 @@ export default function CategoriesManagement() {
                             <div className='grid grid-cols-2 gap-2'>
                                 <button
                                     className="bg-green-600 text-white py-1 rounded hover:bg-green-700"
-                                    onClick={() => updateCategory(category.id)}
+                                    onClick={() => {
+                                        updateCategory(category.id); 
+                                        setError(null); 
+                                        window.scrollTo({ top: 0, behavior: "smooth" })}}
                                 >
-                                    Confirm
+                                    Update
                                 </button>
 
                                 <button
                                     className="bg-red-600 text-white py-1 rounded hover:bg-red-700"
-                                    onClick={() => deleteCategory(category.id)}
+                                    onClick={() => {deleteCategory(category.id); 
+                                            setError(null); 
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                    }}
                                 >
-                                    Reject
+                                    Delete
                                 </button>
                             </div>
                         </div>
                     );
-                }) : (
-                    <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
-                        You have no active requests
-                    </p>
-                )}
+                })}
 
             </section>
         </div>

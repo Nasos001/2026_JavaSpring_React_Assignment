@@ -24,7 +24,7 @@ export default function Registration_Requests() {
     // --------------------------------------------------------------------------------------------------------------
     const [error, setError] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
-    const [success, setSuccess] = useState<boolean | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     const [selectedRoles, setSelectedRoles] = useState<Record<number, string>>({});
     const roles = ["ADMIN", "TECHNICIAN", "USER", "NOT_DETERMINED"];
@@ -38,13 +38,16 @@ export default function Registration_Requests() {
                 const res = await fetch("http://localhost:8080/api/users?role=NOT_DETERMINED", {credentials: "include"});
 
                 // Check for Error
-                if (!res.ok) return setError(true);
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error("Error when getting non_defined users" + msg);
+                }
 
                 // Get data
                 const data: User[] = await res.json();
                 setUsers(data);
 
-                // initialize role map
+                // Initialize role map
                 const initialRoles: Record<number, string> = {};
                 data.forEach(user => {
                     initialRoles[user.id] = user.role;
@@ -52,6 +55,7 @@ export default function Registration_Requests() {
                 setSelectedRoles(initialRoles);
             } catch(error) {
                 console.error(error);
+                setError(true);
             }
         }
 
@@ -77,12 +81,18 @@ export default function Registration_Requests() {
 
             // Handle Result
             if (res.ok) {
-                setSuccess(true);
+                setSuccess("Role has been updated!");
+
+                // Remove User from the UI List
+                setUsers(prev => prev.filter(user => user.id !== id));
             } else {
-                setError(true);
+                const msg = await res.text();
+                throw new Error("Error when updating role:" + msg);
             }
         } catch(error) {
             console.error(error);
+            setError(true);
+            setSuccess(null);
         }
     }
 
@@ -100,12 +110,15 @@ export default function Registration_Requests() {
             if (res.ok) {
                 // Remove the user from the list
                 setUsers(prev => prev.filter(user => user.id !== id));
-                setSuccess(true);
+                setSuccess("User has been deleted");
             } else {
-                setError(true);
+                const msg = await res.text();
+                throw new Error("Error when deleting user:" + msg);
             }
         } catch(error) {
             console.error(error);
+            setError(true);
+            setSuccess(null);
         }
     }
 
@@ -114,8 +127,8 @@ export default function Registration_Requests() {
     return(
         <div className="min-h-screen bg-white">
             {/* Header */}
-            <p className="mt-10 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
-                Active Requests
+            <p className="mt-10 h-15 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
+                Pending Registrations
             </p>
 
             {/* Main Section */}
@@ -131,7 +144,7 @@ export default function Registration_Requests() {
                 {/* Show Success, if any */}
                 { success && 
                     <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 bg-green-300">
-                        Successful Role Change!
+                        {success}
                     </p>
                 }
 
@@ -155,7 +168,7 @@ export default function Registration_Requests() {
                                 [user.id]: e.target.value
                                 }));
                                 setError(false);
-                                setSuccess(false);
+                                setSuccess(null);
                             }}
                         >
                             {roles.map(role => (
@@ -165,11 +178,15 @@ export default function Registration_Requests() {
                         
                         {/* Options */}
                         <div className='grid grid-cols-2'>
-                            <button onClick={() => updateRole(user.id)}>
+                            <button
+                                onClick={() => {updateRole(user.id); window.scrollTo({ top: 0, behavior: "smooth" })}}
+                                disabled={!selectedRoles[user.id] || selectedRoles[user.id] === user.role}
+                            >
                                 Confirm
                             </button>
 
-                            <button onClick={() => rejectRequest(user.id)}>
+
+                            <button onClick={() => {rejectRequest(user.id); window.scrollTo({ top: 0, behavior: "smooth" })}}>
                                 Reject
                             </button>
                         </div>

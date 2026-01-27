@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(String email);
 
     List<User> findByRole(UserRole role);
+
+    long countByRole(UserRole admin);
 }

@@ -117,7 +117,7 @@ public class RequestService {
     // Get All Requests
     // ----------------------------------------------------------------------------------------------------------------
     public List<RequestDTO> getAllRequests() {
-        return requestRepository.findAll()
+        return requestRepository.findAllOrderByCategoryPriority()
                 .stream()
                 .map(request -> {
 
@@ -132,7 +132,7 @@ public class RequestService {
 
                     // Create the DTO for the Request
                     return (new RequestDTO(request.getId(), request.getDescription(),
-                            request.getCategory().getName(), request.getStatus().getLabel(),
+                            request.getCategory().getName(), request.getStatus().name(),
                             request.getComments(), request.getActions(), request.getTechnician(),
                             request.getCreatedAt(), files));
                 }).toList();

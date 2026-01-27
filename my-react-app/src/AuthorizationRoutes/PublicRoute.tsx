@@ -19,7 +19,7 @@ export function PublicRoute({ children }: { children: JSX.Element }) {
       return <Navigate to="/unknownHome" replace />;
     }
     
-    return <Navigate to="/HomePage" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   // If not logged in, render component
