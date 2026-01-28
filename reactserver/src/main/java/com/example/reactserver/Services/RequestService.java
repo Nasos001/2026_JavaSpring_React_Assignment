@@ -87,12 +87,15 @@ public class RequestService {
     public List<RequestDTO> getRequestsForUser(User user, RequestStatus excludeStatus) {
 
         List<Request> requests;
+
+        // Check if a kind of request needs to be excluded
         if (excludeStatus == null) {
             requests = requestRepository.findByUser(user);
         } else {
             requests = requestRepository.findByUserAndStatusNot(user, excludeStatus);
         }
 
+        // Convert all requests to DTOs and return them
         return requests
                 .stream()
                 .map(request -> {
@@ -117,6 +120,8 @@ public class RequestService {
     // Get All Requests
     // ----------------------------------------------------------------------------------------------------------------
     public List<RequestDTO> getAllRequests() {
+
+        // Find Requests in order of Priority
         return requestRepository.findAllOrderByCategoryPriority()
                 .stream()
                 .map(request -> {
@@ -141,15 +146,19 @@ public class RequestService {
     // Update Request
     // ----------------------------------------------------------------------------------------------------------------
     public void updateRequest(UpdateRequest updateRequest) {
+
+        // Find request
         Request request = requestRepository.findById(updateRequest.getId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Request not found"));
 
+        // Update the Request
         request.setStatus(RequestStatus.valueOf(updateRequest.getStatus()));
         request.setActions(updateRequest.getActions());
         request.setComments(updateRequest.getComments());
         request.setTechnician(updateRequest.getTechnician());
 
+        // Save the request in the DB
         requestRepository.save(request);
     }
 

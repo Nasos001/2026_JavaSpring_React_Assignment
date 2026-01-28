@@ -10,14 +10,23 @@ type AuthContextType = {
   authenticated: boolean;
   role: string | null;
   loading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+};
+
+type AuthState = {
+  authenticated: boolean;
+  role: string | null;
+  loading: boolean;
+  error: string | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
   authenticated: false,
   role: null,
   loading: true,
+  error: null,
   login: async () => {},
   logout: async () => {},
 });
@@ -30,10 +39,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Define Login Status
   // -----------------------------------------------------------------------------------------------
-  const [state, setState] = useState({
+  const [state, setState] = useState<AuthState>({
     authenticated: false,
     role: null,
     loading: true,
+    error: null
   });
 
 
@@ -48,9 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             authenticated: true,
             role: data.role,
             loading: false,
+            error: null
           });
         } else {
-          setState({ authenticated: false, role: null, loading: false });
+          setState({ authenticated: false, role: null, loading: false, error: null });
         }
       });
   }, []);
@@ -72,7 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Check Response
       if (!res.ok) {
-        throw new Error("Invalid credentials");
+         if (res.status === 401) {
+          throw new Error("Invalid email or password");
+        }
+        throw new Error("Login failed");
       }
 
       // Get data
@@ -81,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authenticated: true,
         role: data.role,
         loading: false,
+        error: null
       });
 
       // Then navigate
@@ -92,13 +107,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Login failed:", error);
 
+      let message = "Login failed";
+
+      if (error instanceof Error) {
+        message = error.message;
+      }
+
       setState({
         authenticated: false,
         role: null,
         loading: false,
+        error: message
       });
-
-      throw error; 
     }
   };
 
@@ -120,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authenticated: false,
         role: null,
         loading: false,
+        error: null
       });
 
       // Navigate to Intro

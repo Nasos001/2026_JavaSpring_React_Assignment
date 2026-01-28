@@ -20,7 +20,7 @@ export default function CategoriesManagement() {
     // ---------------------------------------------------------------------------------------------------------
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState<boolean | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     const [openNew, setOpenNew] = useState(false);
 
     const [categories, setCategories] = useState<Category[]>([]);
@@ -28,9 +28,11 @@ export default function CategoriesManagement() {
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [priority, setPriority] = useState("");
+    const [priority, setPriority] = useState("LOW");
 
     const priorities = ["LOW", "MEDIUM", "HIGH"];
+    const [confirmDelete, setConfirmDelete] = useState<{ id: number; name: string } | null>(null);
+
 
     // Retrieve Categories 
     // ---------------------------------------------------------------------------------------------------------
@@ -61,7 +63,7 @@ export default function CategoriesManagement() {
                 setSelectedCategories(initialCategories);
             } catch(error) {
                 console.error(error);
-                setSuccess(false);
+                setSuccess(null);
                 setError("Categories could not be retrieved");
             } finally {
                 setLoading(false);
@@ -74,6 +76,7 @@ export default function CategoriesManagement() {
     // Create Category 
     // ---------------------------------------------------------------------------------------------------------
     async function createCategory() {
+
         // Check fields
         if (!name || !description || !priority) {
             setError("Please complete the form");
@@ -91,19 +94,43 @@ export default function CategoriesManagement() {
                 body: JSON.stringify({id: 0, name: name, description: description, priority: priority})
             });
 
+
             // Check Response
-            if (res.ok) {
-                setSuccess(true);
-            } else {
+            if (!res.ok) {
                 const msg = await res.text();
                 throw new Error("Error occurred when creating the category:" + msg);
             }
+
+            // Get the created category
+            const newCategory: Category = await res.json();
+            
+            // Add to categories list
+            setCategories(prev => [...prev, newCategory]);
+
+            
+            // Add to selectedCategories map
+            setSelectedCategories(prev => ({
+                ...prev,
+                [newCategory.id]: [newCategory.name, newCategory.description, newCategory.priority]
+            }));
+
+
+            // Reset form
+            setName("");
+            setDescription("");
+            setPriority("LOW");
+            setOpenNew(false);
+
+
+            // Indicate Success
+            setSuccess("Successfully created the Category!");
+            setError(null);
+
         } catch(error) {
             console.error(error);
-            setSuccess(false);
+            setSuccess(null);
             setError("An error occurred when creating the Category.");
         }
-        
     }
 
     // Update Category 
@@ -125,14 +152,14 @@ export default function CategoriesManagement() {
 
             // Handle Result
             if (res.ok) {
-                setSuccess(true);
+                setSuccess("Successfully updated the Category!");
             } else {
                 const msg = await res.text();
                 throw new Error("Error occurred when updating the category:" + msg);
             }
         } catch(error) {
             console.error(error);
-            setSuccess(false);
+            setSuccess(null);
             setError("An error occurred when updating the category.");
         }
     }
@@ -148,14 +175,14 @@ export default function CategoriesManagement() {
 
             if (res.ok) {
             setCategories(prev => prev.filter(c => c.id !== id));
-            setSuccess(true);
+            setSuccess("Successfully Deleted the Category!");
             } else {
             const msg = await res.text();
             throw new Error(msg || "Error deleting category. It might be in use by a Request.");
             }
         } catch (err) {
             console.error(err);
-            setSuccess(false);
+            setSuccess(null);
             setError(err instanceof Error ? err.message : "Unknown error");
         }
     }
@@ -183,7 +210,7 @@ export default function CategoriesManagement() {
                 {/* Show Success, if any */}
                 { success && 
                     <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 bg-green-300">
-                        Successful Role Change!
+                        {success}
                     </p>
                 }
 
@@ -314,9 +341,7 @@ export default function CategoriesManagement() {
 
                                 <button
                                     className="bg-red-600 text-white py-1 rounded hover:bg-red-700"
-                                    onClick={() => {deleteCategory(category.id); 
-                                            setError(null); 
-                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                    onClick={() => {setConfirmDelete({ id: category.id, name: category.name })
                                     }}
                                 >
                                     Delete
@@ -326,6 +351,33 @@ export default function CategoriesManagement() {
                     );
                 })}
 
+                {confirmDelete && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded shadow-md w-96">
+                            <p className="mb-4 text-lg font-semibold">
+                                Are you sure you want to delete "{confirmDelete.name}"?
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    className="bg-gray-300 py-1 px-4 rounded hover:bg-gray-400"
+                                    onClick={() => setConfirmDelete(null)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-red-600 text-white py-1 px-4 rounded hover:bg-red-700"
+                                    onClick={() => {
+                                        deleteCategory(confirmDelete.id);
+                                        window.scrollTo({ top: 0, behavior: "smooth" })
+                                        setConfirmDelete(null);
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </section>
         </div>
     );

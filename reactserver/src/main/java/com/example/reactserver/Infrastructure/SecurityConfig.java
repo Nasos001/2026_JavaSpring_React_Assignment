@@ -62,14 +62,25 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
+
+                // Remove Browser Popup
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .csrf(csrf -> csrf.disable())
+
+                // Remove HTTP Authentication to allow JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Apply JWT Filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        // Only guests can register / login
                         .requestMatchers("/api/auth/login", "/api/auth/register").anonymous()
+
+                        // Allow logout and JWT check
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Only a logged in user may use this endpoint
                         .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().authenticated());
 

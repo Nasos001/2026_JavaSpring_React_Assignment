@@ -54,30 +54,40 @@ public class UserController {
             @RequestParam(required = false) String role,
             @RequestParam(required = false) Integer id) {
 
-        boolean isTechnician = authentication.getAuthorities().stream()
+        // Is the client a Technician?
+        boolean isTechnician = authentication.getAuthorities()
+                .stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_TECHNICIAN"));
 
-        // Technicians may NOT fetch by ID
+        // Check if a Technician wants a User by ID
         if (isTechnician && id != null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Technicians may only query users by role");
         }
 
-        // Admin-only: fetch by ID
+        // Fetch by ID
         if (id != null) {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             return List.of(new UserDTO(user));
         }
 
-        // Both Admin & Technician: fetch by role
+        // Fetch by Role
         if (role != null) {
+            // Technicians can only fetch TECHNICIAN users
+            if (isTechnician && !role.equals("TECHNICIAN")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Technicians may only query users with role TECHNICIAN");
+            }
+
+            // Find Users based on Role
             return userRepository.findByRole(UserRole.valueOf(role))
                     .stream()
                     .map(UserDTO::new)
                     .toList();
         }
 
+        // Throw error otherwise
         throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Either 'role' or 'id' must be provided");
@@ -121,6 +131,8 @@ public class UserController {
         user.setAddress(userDTO.getAddress());
         user.setUsername(userDTO.getUsername());
         user.setRole(UserRole.valueOf(userDTO.getRole()));
+
+        // Save User in DB
         userRepository.save(user);
 
         // Respond to the Client
@@ -134,11 +146,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
 
-        // 1️⃣ Find the user
+        // Find the user
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // 2️⃣ Check if user is ADMIN
+        // Check if user is ADMIN
         if (user.getRole() == UserRole.ADMIN) {
             // Count how many admins exist
             long adminCount = userRepository.countByRole(UserRole.ADMIN);
@@ -150,10 +162,10 @@ public class UserController {
             }
         }
 
-        // 3️⃣ Delete all requests associated with this user
-        requestRepository.deleteByUser(user); // You'll need this method in RequestRepository
+        // Delete all requests associated with this user
+        requestRepository.deleteByUser(user);
 
-        // 4️⃣ Delete the user
+        // Delete the user
         userRepository.delete(user);
 
         return ResponseEntity.noContent().build();

@@ -23,6 +23,8 @@ public class JwtService {
     private final Key SECRET_KEY;
     private final long EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
 
+    // Constructor
+    // ----------------------------------------------------------------------------------------------------------------
     public JwtService(@Value("${jwt.secret}") String secret) {
         // Convert base64 string to a Key
         this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

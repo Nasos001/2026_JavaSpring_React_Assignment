@@ -25,6 +25,7 @@ export default function Registration_Requests() {
     const [error, setError] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [success, setSuccess] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: number; name: string } | null>(null);
 
     const [selectedRoles, setSelectedRoles] = useState<Record<number, string>>({});
     const roles = ["ADMIN", "TECHNICIAN", "USER", "NOT_DETERMINED"];
@@ -186,7 +187,7 @@ export default function Registration_Requests() {
                             </button>
 
 
-                            <button onClick={() => {rejectRequest(user.id); window.scrollTo({ top: 0, behavior: "smooth" })}}>
+                            <button onClick={() => setConfirmDelete({ id: user.id ?? 0, name: user.name ?? ""})}>
                                 Reject
                             </button>
                         </div>
@@ -196,6 +197,34 @@ export default function Registration_Requests() {
                     <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
                         You have no active requests
                     </p>
+                )}
+
+                {confirmDelete && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded shadow-md w-96">
+                            <p className="mb-4 text-lg font-semibold">
+                                Are you sure you want to reject {confirmDelete.name}'s Registration?
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    className="bg-gray-300 py-1 px-4 rounded hover:bg-gray-400"
+                                    onClick={() => setConfirmDelete(null)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-red-600 text-white py-1 px-4 rounded hover:bg-red-700"
+                                    onClick={() => {
+                                        rejectRequest(confirmDelete.id);
+                                        window.scrollTo({ top: 0, behavior: "smooth" });
+                                        setConfirmDelete(null);
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </section> 
         </div>

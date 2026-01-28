@@ -1,7 +1,5 @@
 package com.example.reactserver.Entities;
 
-import java.time.LocalDateTime;
-
 // Imports 
 // ===============================================================================================================================================
 import jakarta.persistence.Column;
@@ -10,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import java.time.LocalDateTime;
 
 // Class 
 // ===============================================================================================================================================
@@ -39,11 +38,11 @@ public class Announcement {
         this.content = content;
     }
 
-    // Setters & Getters
-    // -----------------------------------------------------------------------------------------------------------------
     public Announcement() {
     }
 
+    // Setters & Getters
+    // -----------------------------------------------------------------------------------------------------------------
     public int getId() {
         return id;
     }

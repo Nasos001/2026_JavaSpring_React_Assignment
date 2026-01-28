@@ -16,14 +16,18 @@ export default function Announcements() {
     // --------------------------------------------------------------------------------------------------------------------
     const [announcement, setAnnouncement] = useState<Announcement>({title: "", content: ""});
     const [success, setSuccess] = useState(false);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState<string | null>("");
 
     // Handle Announcement 
     // --------------------------------------------------------------------------------------------------------------------
     const handleAnnouncement = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(false);
+        setError(null);
         setSuccess(false);
+
+        if (!announcement.title || !announcement.content) {
+            return setError("Please complete the form!");
+        }
 
         try {
             // Make fetch
@@ -47,7 +51,7 @@ export default function Announcements() {
             }
         } catch(error) {
             console.error(error);
-            setError(true);
+            setError("An error occurred. Please try again later.");
         }
     }
 
@@ -60,7 +64,7 @@ export default function Announcements() {
                 {/* Error */}
                 {error && (
                 <p className="rounded-lg mx-auto p-3 text-lg mb-5 bg-red-300">
-                    An error occurred. Please try again later.
+                    {error}
                 </p>
                 )}
 
@@ -82,9 +86,10 @@ export default function Announcements() {
                     type="text"
                     name="title"
                     value={announcement.title}
-                    onChange={(e) =>
-                        setAnnouncement(prev => ({ ...prev, [e.target.name]: e.target.value }))
-                    }
+                    onChange={(e) => {
+                        setAnnouncement(prev => ({ ...prev, [e.target.name]: e.target.value }));
+                        setError(null);
+                    }}
                     placeholder="ex. Maintenance"
                     required
                     />
@@ -99,9 +104,10 @@ export default function Announcements() {
                     className="w-full h-32 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     name="content"
                     value={announcement.content}
-                    onChange={(e) =>
-                        setAnnouncement(prev => ({ ...prev, [e.target.name]: e.target.value }))
-                    }
+                    onChange={(e) => {
+                        setAnnouncement(prev => ({ ...prev, [e.target.name]: e.target.value }));
+                        setError(null);
+                    }}
                     placeholder="On January..."
                     required
                     />
@@ -109,8 +115,7 @@ export default function Announcements() {
 
                 {/* Submit */}
                 <button
-                    className="w-3/4 mx-auto block rounded-lg bg-blue-600 py-2.5 text-white text-sm mt-5 font-medium hover:bg-blue-700 transition"
-                    disabled={!announcement.title || !announcement.content}
+                    className={`w-3/4 mx-auto block rounded-lg bg-blue-600 py-2.5 text-white text-sm mt-5 font-medium hover:bg-blue-700 transition`}
                     type="submit"
                 >
                     Announce

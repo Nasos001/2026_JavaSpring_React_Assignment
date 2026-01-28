@@ -49,6 +49,8 @@ public class CategoryController {
     // ----------------------------------------------------------------------------------------------------------------
     @GetMapping
     public List<CategoryDTO> getAllCategories() {
+
+        // Retrieve all categories
         return categoryRepository.findAll()
                 .stream()
                 .map(category -> new CategoryDTO(category.getId(),
@@ -79,7 +81,6 @@ public class CategoryController {
     }
 
     // Delete Category Endpoint
-    // ----------------------------------------------------------------------------------------------------------------//
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -94,15 +95,16 @@ public class CategoryController {
         List<Request> requestsUsingCategory = requestRepository.findByCategory(category);
 
         // If there are requests, check if they are all COMPLETED
-        boolean hasNonCompleted = requestsUsingCategory.stream()
-                .anyMatch(r -> r.getStatus() != RequestStatus.COMPLETED);
+        boolean hasNonCompleted = requestsUsingCategory
+                .stream()
+                .anyMatch(request -> request.getStatus() != RequestStatus.COMPLETED);
 
         if (hasNonCompleted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Cannot delete category: it is used in requests that are not completed");
         }
 
-        // If all requests are completed, optionally delete them (cascade)
+        // If all requests are completed, delete them
         if (!requestsUsingCategory.isEmpty()) {
             requestRepository.deleteAll(requestsUsingCategory);
         }
@@ -117,17 +119,23 @@ public class CategoryController {
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Void> postMethodName(@RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDTO) {
 
         // Create new Category
         Category category = new Category(categoryDTO.getName(), categoryDTO.getDescription(),
                 Priority.valueOf(categoryDTO.getPriority()));
 
         // Save Category in DB
-        categoryRepository.save(category);
+        Category savedCategory = categoryRepository.save(category);
 
-        // Respond to the Client
-        return ResponseEntity.ok().build();
+        // Convert to DTO and return
+        CategoryDTO responseDTO = new CategoryDTO(
+                savedCategory.getId(),
+                savedCategory.getName(),
+                savedCategory.getDescription(),
+                savedCategory.getPriority().name());
+
+        return ResponseEntity.ok(responseDTO);
     }
 
 }

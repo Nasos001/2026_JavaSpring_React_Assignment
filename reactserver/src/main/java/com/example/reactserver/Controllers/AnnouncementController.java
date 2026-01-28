@@ -38,6 +38,7 @@ public class AnnouncementController {
     @PostMapping
     public ResponseEntity<Void> createAnnouncement(@RequestBody Announcement announcement) {
 
+        // Save Announcement
         announcementRepository.save(announcement);
 
         // Respond to the Client
@@ -50,6 +51,7 @@ public class AnnouncementController {
     @GetMapping
     public List<Announcement> getAnnouncements() {
 
+        // Return all Announcements
         return announcementRepository.findAll();
     }
 

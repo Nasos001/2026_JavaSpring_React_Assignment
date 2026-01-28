@@ -82,15 +82,21 @@ public class RequestController {
             @RequestParam(required = false) RequestStatus excludeStatus,
             @RequestParam(defaultValue = "false") boolean all) {
 
+        // Check if the User wants all requests
         if (all) {
-            if (!authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
-                            || a.getAuthority().equals("ROLE_TECHNICIAN"))) {
+            // Check if the User is a simple User
+            if (!authentication.getAuthorities()
+                    .stream()
+                    .anyMatch(
+                            a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_TECHNICIAN"))) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
+
+            // Otherwise, return all requests
             return requestService.getAllRequests();
         }
 
+        // Otherwise, get requests minus the explicit status
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));

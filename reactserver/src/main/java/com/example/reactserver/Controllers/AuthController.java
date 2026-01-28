@@ -49,19 +49,22 @@ public class AuthController {
         Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
 
         if (userOpt.isPresent()) {
+            // Get User
             User user = userOpt.get();
+
+            // Check Password given to the one stored
             if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
 
+                // Create JWT
                 String token = jwtService.generateToken(user.getEmail());
+
+                // Create Cookie for storage
                 Cookie cookie = new Cookie("authToken", token);
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
                 cookie.setMaxAge(7 * 24 * 60 * 60);
 
-                /* TESTING */
-                System.out.println("Setting JWT cookie for user: " + user.getEmail());
-                System.out.println("Token: " + token);
-
+                // Add cookie to response
                 response.addCookie(cookie);
                 return ResponseEntity.ok(new AuthResponse("Login successful", user.getRole().name()));
             }
@@ -76,7 +79,7 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN', 'USER', 'NOT_DETERMINED')")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        // Create Cookie
+        // Create expired Cookie
         Cookie cookie = new Cookie("authToken", null);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
@@ -94,12 +97,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
 
+        // Check if User already exists
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(new AuthResponse("Email already exists"));
         }
 
+        // Create new User
         User newUser = new User(
                 registerRequest.getName(),
                 registerRequest.getSurname(),
@@ -111,8 +116,10 @@ public class AuthController {
                 passwordEncoder.encode(registerRequest.getPassword()),
                 UserRole.NOT_DETERMINED);
 
+        // Save User in the DB
         userRepository.save(newUser);
 
+        // Respond to the Client
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new AuthResponse("Registration successful"));
     }

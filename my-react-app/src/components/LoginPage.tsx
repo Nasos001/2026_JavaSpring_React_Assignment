@@ -11,8 +11,8 @@ export default function LoginPage() {
   // ---------------------------------------------------------------------------------------------------------------
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<boolean | null>(false);
-  const {login} = useAuth();
+  const [login_error, setError] = useState<string| null>(null);
+  const {login, error} = useAuth();
 
   const navigate = useNavigate();
 
@@ -20,12 +20,12 @@ export default function LoginPage() {
   // ---------------------------------------------------------------------------------------------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(false);
+    setError(null);
 
     try {
       await login(email, password);
     } catch {
-      setError(true);
+      setError("An error occurred");
     }
   };
 
@@ -39,9 +39,9 @@ export default function LoginPage() {
         <h2 className="text-2xl font-semibold text-center mb-6">Log In</h2>
 
         {/* Error Message, if any */}
-        {error && (
-        <div className="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-700">
-          Invalid email or password
+        {(error || login_error) && (
+        <div className="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-700 text-center">
+          {error || login_error}
         </div>
         )}
 

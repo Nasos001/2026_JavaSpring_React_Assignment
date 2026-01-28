@@ -45,15 +45,15 @@ export default function UserManagement() {
     const [newUser, setNewUser] = useState<Partial<User>>({});
 
     const [success, setSuccess] = useState<string | null>(null);
-    
+    const [confirmDelete, setConfirmDelete] = useState<{ id: number; name: string } | null>(null);
 
     const [countriesData, setCountriesData] = useState<Countries[]>([]);
     const [countries, setCountries] = useState<string[]>([]);
 
     const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+        type: "success" | "error";
+        text: string;
+    } | null>(null);
 
   const isFormValid = 
     newUser.name?.trim() &&
@@ -229,7 +229,8 @@ export default function UserManagement() {
                 setMessage(null);
                 setSuccess("Successfully deleted the User!");
             } else {
-                throw new Error("Error when deleting a User");
+                const msg = await res.text();
+                throw new Error("Error when deleting the User:"+ msg);
             }
         } catch(error) {
             console.error(error);
@@ -268,7 +269,7 @@ export default function UserManagement() {
                 }
 
                 {/* Success Message */}
-                {success && <p className="rounded-lg mx-auto p-3 text-lg mb-5 bg-green-300">Success!</p>}
+                {success && <p className="rounded-lg mx-auto p-3 text-lg mb-5 bg-green-300">{success}</p>}
 
                 {/* Create New User */}
                 {!openNew ? (
@@ -336,7 +337,7 @@ export default function UserManagement() {
                 {/* Search Form */}
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <input type="number" className="border border-gray-500 rounded p-2" value={search} onChange={(e) => {setSearch(Number(e.target.value)); setMessage(null)}} />
-                    <button type="button" className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700" onClick={() => {fetchUser(); setUser({})}}>
+                    <button type="button" className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700" onClick={() => {fetchUser(); setUser({}); setMessage(null); setSuccess(null)}}>
                         Search
                     </button>
                 </div>
@@ -392,12 +393,39 @@ export default function UserManagement() {
                             >
                                 Update
                             </button>
-                            <button className="bg-red-600 text-white rounded p-2 hover:bg-red-700" onClick={() => {
-                                deleteUser(user.id!); 
-                                window.scrollTo({ top: 0, behavior: "smooth" })}}
+                            <button className="bg-red-600 text-white rounded p-2 hover:bg-red-700" onClick={() => 
+                                setConfirmDelete({ id: user.id ?? 0, name: user.name ?? ""})}
                             >
                                 Delete
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {confirmDelete && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded shadow-md w-96">
+                            <p className="mb-4 text-lg font-semibold">
+                                Are you sure you want to delete {confirmDelete.name}?
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    className="bg-gray-300 py-1 px-4 rounded hover:bg-gray-400"
+                                    onClick={() => setConfirmDelete(null)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-red-600 text-white py-1 px-4 rounded hover:bg-red-700"
+                                    onClick={() => {
+                                        deleteUser(confirmDelete.id);
+                                        window.scrollTo({ top: 0, behavior: "smooth" });
+                                        setConfirmDelete(null);
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
