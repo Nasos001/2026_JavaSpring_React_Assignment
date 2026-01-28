@@ -80,9 +80,32 @@ public class SecurityConfig {
                         // Allow logout and JWT check
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Only a logged in user may use this endpoint
+                        // Only authenticated users may use this endpoint
                         .requestMatchers("/api/users/**").authenticated()
-                        .anyRequest().authenticated());
+
+                        // Permit all static resources and React routes
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.ico",
+                                "/**/*.js",
+                                "/**/*.css",
+                                "/**/*.png",
+                                "/**/*.svg",
+                                "/**/*.jpg",
+                                "/**/*.jpeg",
+                                "/**/*.gif",
+                                "/**/*.woff",
+                                "/**/*.woff2",
+                                "/**/*.ttf")
+                        .permitAll()
+
+                        // Only API endpoints require authentication
+                        .requestMatchers("/api/**").authenticated()
+
+                        // Allow all other requests (React routes)
+                        .anyRequest().permitAll());
 
         return http.build();
     }
