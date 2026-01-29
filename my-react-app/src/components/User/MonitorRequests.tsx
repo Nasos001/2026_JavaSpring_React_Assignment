@@ -102,20 +102,20 @@ export default function MonitorRequests() {
                         </p>
 
                         <p className="font-semibold">Actions: </p>
-                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
+                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-full bg-indigo-100'
                             value={request.actions ?? ""} 
                             readOnly
                         />
 
                         <p className="font-semibold">Comments: </p>
-                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
+                        <textarea className='border border-slate-500 rounded-md p-1 h-32 w-full bg-indigo-100'
                             value={request.comments} 
                             readOnly
                         />
 
                         {/* Files */}
                         <br/>Files:
-                        {request.files.length > 0 && (
+                        {request.files.length > 0 ? (
                             <ul className="mt-2 list-disc list-inside">
                                 {request.files.map(file => (
                                     <li key={file.id ?? ""}>
@@ -128,6 +128,8 @@ export default function MonitorRequests() {
                                     </li>
                                 ))}
                             </ul>
+                        ) : (
+                            <p className='mt-2'>No files found</p>
                         )}
                     </div>
                 ))}

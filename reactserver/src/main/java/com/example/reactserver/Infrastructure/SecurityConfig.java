@@ -62,28 +62,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
-
-                // Remove Browser Popup
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .csrf(csrf -> csrf.disable())
-
-                // Remove HTTP Authentication to allow JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Apply JWT Filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // Only guests can register / login
-                        .requestMatchers("/api/auth/login", "/api/auth/register").anonymous()
-
-                        // Allow logout and JWT check
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // Only authenticated users may use this endpoint
-                        .requestMatchers("/api/users/**").authenticated()
-
-                        // Permit all static resources and React routes
+                        // Public endpoints
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -94,17 +79,18 @@ public class SecurityConfig {
                                 "/**/*.png",
                                 "/**/*.svg",
                                 "/**/*.jpg",
-                                "/**/*.jpeg",
-                                "/**/*.gif",
-                                "/**/*.woff",
-                                "/**/*.woff2",
-                                "/**/*.ttf")
+                                "/**/*.jpeg")
                         .permitAll()
 
-                        // Only API endpoints require authentication
+                        // Auth endpoints
+                        .requestMatchers("/api/auth/login", "/api/auth/register").anonymous()
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // Protected API endpoints
+                        .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
 
-                        // Allow all other requests (React routes)
+                        // Allow all other requests (React SPA routes)
                         .anyRequest().permitAll());
 
         return http.build();

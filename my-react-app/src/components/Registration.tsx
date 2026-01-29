@@ -39,6 +39,7 @@ export default function Register() {
     const [countriesData, setCountriesData] = useState<Countries[]>([]);
     const [countries, setCountries] = useState<string[]>([]);
     const [cities, setCities] = useState<string[]>([]);
+    
     const [form, setForm] = useState<RegisterRequest>({
         name: "",
         surname: "",

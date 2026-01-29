@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Login failed:", error);
 
+      // Make error message
       let message = "Login failed";
-
       if (error instanceof Error) {
         message = error.message;
       }
@@ -135,7 +135,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     } catch (error) {
       console.error("Logout request failed:", error);
+      
     } finally {
+
+      // Exit the User in the UI
       setState({
         authenticated: false,
         role: null,

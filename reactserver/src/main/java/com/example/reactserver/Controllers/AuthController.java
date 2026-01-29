@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -95,7 +96,27 @@ public class AuthController {
     // Register Endpoint
     // ----------------------------------------------------------------------------------------------------------------
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(Authentication authentication, @RequestBody RegisterRequest registerRequest) {
+
+        boolean isAuthenticated = authentication != null &&
+                authentication.isAuthenticated() &&
+                !authentication.getPrincipal().equals("anonymousUser");
+
+        // Check if user is authenticated (logged in)
+        if (isAuthenticated) {
+
+            // Check if the authenticated user is an ADMIN
+            boolean isAdmin = authentication.getAuthorities()
+                    .stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            // If not admin, they shouldn't be creating users while logged in
+            if (!isAdmin) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(new AuthResponse("You cannot register while logged in"));
+            }
+        }
 
         // Check if User already exists
         if (userRepository.existsByEmail(registerRequest.getEmail())) {

@@ -1,0 +1,23 @@
+package com.example.reactserver.Infrastructure;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Explicitly serve static resources
+        registry.addResourceHandler("/assets/**")
+                .addResourceLocations("classpath:/static/assets/")
+                .setCachePeriod(3600);
+        
+        registry.addResourceHandler("/favicon.ico")
+                .addResourceLocations("classpath:/static/");
+        
+        registry.addResourceHandler("/*.js", "/*.css")
+                .addResourceLocations("classpath:/static/");
+    }
+}

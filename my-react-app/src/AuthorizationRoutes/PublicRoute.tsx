@@ -11,7 +11,7 @@ export function PublicRoute({ children }: { children: JSX.Element }) {
   const { authenticated, role, loading } = useAuth();
 
   // If loading, do nothing
-  if (loading) return null; // or spinner
+  if (loading) return null; 
 
   // If logged in, redirect based on role
   if (authenticated) {

@@ -168,17 +168,19 @@ export default function CategoriesManagement() {
     // ---------------------------------------------------------------------------------------------------------
     async function deleteCategory(id: number) {
         try {
+            // Make fetch
             const res = await fetch(`http://localhost:8080/api/categories/${id}`, {
             method: "DELETE",
             credentials: "include",
             });
 
+            // Check Result
             if (res.ok) {
-            setCategories(prev => prev.filter(c => c.id !== id));
-            setSuccess("Successfully Deleted the Category!");
+                setCategories(prev => prev.filter(c => c.id !== id));
+                setSuccess("Successfully Deleted the Category!");
             } else {
-            const msg = await res.text();
-            throw new Error(msg || "Error deleting category. It might be in use by a Request.");
+                const msg = await res.text();
+                throw new Error(msg || "Error deleting category. It might be in use by a Request.");
             }
         } catch (err) {
             console.error(err);
@@ -214,14 +216,17 @@ export default function CategoriesManagement() {
                     </p>
                 }
 
+                {/* Show Action */}
                 { loading && <p className="text-center">Loading Categories...</p> }
 
+                {/* Inform in case of no results */}
                 { !loading && !error && categories.length === 0 && (
                     <p className={"h-96 max-w-3/4 rounded-lg m-auto p-3 mb-5 bg-blue-200 font-bold text-2xl flex items-center justify-center"}>
                         There are no categories
                     </p>
                 )}
 
+                {/* Create a Category Section */}
                 {!openNew ? 
                 <div className="border-b-blue-800 bg-blue-400 rounded p-4 mb-4 flex flex-1 gap-5 hover:cursor-pointer"
                     onClick={() => setOpenNew(true)}
@@ -351,6 +356,7 @@ export default function CategoriesManagement() {
                     );
                 })}
 
+                {/* Confirmation Window */}
                 {confirmDelete && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded shadow-md w-96">

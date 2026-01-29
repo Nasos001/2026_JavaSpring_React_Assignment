@@ -40,7 +40,7 @@ export default function Requests() {
     const [success, setSuccess] = useState<string | null>(null);
 
     const [selectedRequests, setSelectedRequests] = useState<Record<number, [string, string, string, number | null]>>({});
-    const [selectedStatus, setSelectedStatus] = useState("NEW")
+    const [selectedStatus, setSelectedStatus] = useState("")
     const statuses = ["NEW", "IN_PROGRESS", "COMPLETED"];
 
     // Retrieve Requests 
@@ -63,7 +63,7 @@ export default function Requests() {
                 const data: Request[] = await res.json();
                 setRequests(data);
 
-                // initialize role map
+                // Initialize Request mutable information
                 const initialRequests: Record<number, [string, string, string, number]> = {};
                 data.forEach(request => {
                     initialRequests[request.id] = [request.status, request.actions, request.comments, request.technician];
@@ -79,6 +79,16 @@ export default function Requests() {
 
         fetchRequests();
     }, [])
+
+    // Reset request data when status filter changes
+    // ------------------------------------------------------------------------------------------------------------------
+    useEffect(() => {
+        const resetRequests: Record<number, [string, string, string, number | null]> = {};
+        requests.forEach(request => {
+            resetRequests[request.id] = [request.status, request.actions, request.comments, request.technician];
+        });
+        setSelectedRequests(resetRequests);
+    }, [selectedStatus, requests]);
 
     // Retrieve Technicians 
     // ------------------------------------------------------------------------------------------------------------------
@@ -106,7 +116,7 @@ export default function Requests() {
         fetchTechnicians();
     }, [])
 
-    // Handle Change 
+    // Update Request 
     // ------------------------------------------------------------------------------------------------------------------
     async function updateRequest(id: number) {
         try {
@@ -142,7 +152,7 @@ export default function Requests() {
         <div className="min-h-screen bg-white">
 
             {/* Header */}
-            <p className="mt-10 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
+            <p className="mt-10 h-50 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
                 Active Requests
             </p>
 
@@ -172,24 +182,25 @@ export default function Requests() {
                 )}
 
                 {/* Status Filter */}
-                <div className='flex items-center text-center font-bold mb-5 gap-5'>
-                    Status:
-                    <select className='text-center bg-indigo-300 rounded p-1 font-semibold hover:bg-indigo-200'
-                        value={selectedStatus} 
-                        onChange={(e) => setSelectedStatus(e.target.value)}>
-                            <option value={""}>All</option>
-                        {statuses.map((s) => (
-                            <option value={s}>{s}</option>
-                        ))}
-                    </select>
-                </div>
-                
+                { !loading && !error && requests.length !== 0 && (
+                    <div className='flex items-center text-center font-bold mb-5 gap-5'>
+                        Status:
+                        <select className='text-center bg-indigo-300 rounded p-1 font-semibold hover:bg-indigo-200'
+                            value={selectedStatus} 
+                            onChange={(e) => setSelectedStatus(e.target.value)}>
+                                <option value={""}>All</option>
+                            {statuses.map((s) => (
+                                <option value={s}>{s}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 {/* Display Requests */}
                 {requests.length > 0 && requests.map((request) => {
                     const [status, actions, comments, technician] = selectedRequests[request.id] || ["", "", "", 0];
 
-                    if (selectedStatus === status || selectedStatus === "") 
+                    if ( request.status === selectedStatus || selectedStatus === "") 
                     return(
                         <div key={request.id} className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4">
                             {/* Details */}
@@ -220,7 +231,7 @@ export default function Requests() {
                             )} <br/>
 
                             {/* Statuses */}
-                            <div className='grid grid-cols-5'>
+                            <div className='flex gap-10'>
                                 <p className="font-semibold">Status:</p>
                                 <select className='bg-indigo-100 rounded p-1'
                                     value={status} 
@@ -235,7 +246,7 @@ export default function Requests() {
                             </div>
 
                             {/* Technicians */}
-                            <div className='grid grid-cols-5 mt-3'>
+                            <div className='flex gap-2 mt-5'>
                                 <p className="font-semibold">Technician:</p>
                                 <select className='bg-indigo-100 rounded p-1'
                                     value={technician ?? 0} 
@@ -253,7 +264,7 @@ export default function Requests() {
 
                             {/* Actions */}
                             <p className="font-semibold mt-3">Actions:</p>
-                            <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
+                            <textarea className='border border-slate-500 rounded-md p-1 h-32 w-full bg-indigo-100'
                                 value={actions}
                                 onChange={(e) => setSelectedRequests(prev => ({
                                 ...prev,
@@ -262,7 +273,7 @@ export default function Requests() {
                             
                             {/* Comments */}
                             <p className="font-semibold mt-3">Comments:</p>
-                            <textarea className='border border-slate-500 rounded-md p-1 h-32 w-lg bg-indigo-100'
+                            <textarea className='border border-slate-500 rounded-md p-1 h-32 w-full bg-indigo-100'
                                 value={comments}
                                 onChange={(e) => setSelectedRequests(prev => ({
                                 ...prev,

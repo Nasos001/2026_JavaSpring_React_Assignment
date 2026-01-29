@@ -128,7 +128,7 @@ export default function Registration_Requests() {
     return(
         <div className="min-h-screen bg-white">
             {/* Header */}
-            <p className="mt-10 h-15 text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
+            <p className="mt-10 h-50 text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center">
                 Pending Registrations
             </p>
 
@@ -161,7 +161,7 @@ export default function Registration_Requests() {
 
                         {/* Role Dropdown */}
                         <br/>Role:
-                        <select
+                        <select className='bg-indigo-100 rounded p-1'
                             value={selectedRoles[user.id]}
                             onChange={(e) => {
                                 setSelectedRoles(prev => ({
@@ -199,6 +199,7 @@ export default function Registration_Requests() {
                     </p>
                 )}
 
+                {/* Confirmation Window */}
                 {confirmDelete && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded shadow-md w-96">

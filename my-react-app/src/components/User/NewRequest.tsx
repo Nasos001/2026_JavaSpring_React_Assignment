@@ -123,6 +123,16 @@ export default function NewRequest() {
                 ))}
             </select>
 
+            {/* Category Description */}
+            {selectedCategory && (
+              <div className="mt-4 p-3 bg-blue-100 rounded-lg text-left">
+                <p className="font-medium text-gray-700">Description:</p>
+                <p className="text-gray-600">
+                  {categories.find(cat => cat.id === selectedCategory)?.description}
+                </p>
+              </div>
+            )}
+
             {/* Description */}
             <label className="mt-20 mb-2 flex text-left font-medium">
                 Request Description:

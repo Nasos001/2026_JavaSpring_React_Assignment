@@ -110,26 +110,30 @@ export default function HomePage() {
       {/* Announcements */}
       <div className="bg-blue-950 border border-b-blue-400 w-full flex justify-center px-4">
         <div className="w-full max-w-3xl">
-          {announcements
-          .filter(announcement => {
-            const createdAt = new Date(announcement.createdAt).getTime();
-            return Date.now() - createdAt <= 30 * 24 * 60 * 60 * 1000;
-          })
-          .map((announcement) => (
-            <div className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4 mt-5">
-              <p className="font-bold text-lg sm:text-xl">{announcement.title}</p>
-              <p className="font-semibold">Created at:{" "} 
-                  <span className='font-normal'>
-                      {new Date(announcement.createdAt).toLocaleString()} {/* ✅ Format to local time */}
-                  </span>
-              </p>
+          <div className='text-center text-white font-bold text-3xl py-5'>
+            Announcements
+          </div>
 
-              <textarea
-                className="mt-4 w-full h-40 sm:h-48 bg-white rounded-lg p-4 resize-none"
-                value={announcement.content}
-                readOnly
-              />
-            </div>
+          {announcements
+            .filter(announcement => {
+              const createdAt = new Date(announcement.createdAt).getTime();
+              return Date.now() - createdAt <= 30 * 24 * 60 * 60 * 1000;
+            })
+            .map((announcement) => (
+              <div className="border-b-blue-800 bg-blue-200 rounded p-4 mb-4 mt-5">
+                <p className="font-bold text-lg sm:text-xl">{announcement.title}</p>
+                <p className="font-semibold">Created at:{" "} 
+                    <span className='font-normal'>
+                        {new Date(announcement.createdAt).toLocaleString()} 
+                    </span>
+                </p>
+
+                <textarea
+                  className="mt-4 w-full h-40 sm:h-48 bg-white rounded-lg p-4 resize-none"
+                  value={announcement.content}
+                  readOnly
+                />
+              </div>
           ))}
         </div>
         

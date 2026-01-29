@@ -55,15 +55,15 @@ export default function UserManagement() {
         text: string;
     } | null>(null);
 
-  const isFormValid = 
-    newUser.name?.trim() &&
-    newUser.surname?.trim() &&
-    newUser.username?.trim() &&
-    newUser.email?.trim() &&
-    newUser.country &&
-    newUser.city &&
-    newUser.address &&
-    password.trim();
+    const isFormValid = 
+        newUser.name?.trim() &&
+        newUser.surname?.trim() &&
+        newUser.username?.trim() &&
+        newUser.email?.trim() &&
+        newUser.country &&
+        newUser.city &&
+        newUser.address &&
+        password.trim();
 
 
     // Variables
@@ -166,6 +166,8 @@ export default function UserManagement() {
             if (res.ok) {
                 setMessage(null);
                 setSuccess("Successfully registered the User!");
+                setNewUser({});
+                setOpenNew(false);
             } else {
                 throw new Error("Error when creating a user");
             }
@@ -327,7 +329,7 @@ export default function UserManagement() {
                             </button>
 
                             {/* Discard Button */}
-                            <button type="button" onClick={() => setOpenNew(false)} disabled={loading} className="w-full rounded-lg bg-red-600 py-2.5 text-white text-sm font-medium hover:bg-red-700 transition disabled:opacity-50">
+                            <button type="button" onClick={() => {setOpenNew(false); setNewUser({});}} disabled={loading} className="w-full rounded-lg bg-red-600 py-2.5 text-white text-sm font-medium hover:bg-red-700 transition disabled:opacity-50">
                                 Discard
                             </button>
                         </form>
@@ -402,6 +404,7 @@ export default function UserManagement() {
                     </div>
                 )}
 
+                {/* Confirmation Window */}
                 {confirmDelete && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded shadow-md w-96">
