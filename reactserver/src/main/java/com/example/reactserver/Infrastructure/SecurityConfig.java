@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Auth endpoints
-                        .requestMatchers("/api/auth/login", "/api/auth/register").anonymous()
+                        .requestMatchers("/api/auth/login").anonymous()
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // Protected API endpoints

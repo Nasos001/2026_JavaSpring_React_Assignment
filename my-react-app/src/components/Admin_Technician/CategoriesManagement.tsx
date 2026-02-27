@@ -179,8 +179,7 @@ export default function CategoriesManagement() {
                 setCategories(prev => prev.filter(c => c.id !== id));
                 setSuccess("Successfully Deleted the Category!");
             } else {
-                const msg = await res.text();
-                throw new Error(msg || "Error deleting category. It might be in use by a Request.");
+                throw new Error("Error deleting category. It might be in use by a Request.");
             }
         } catch (err) {
             console.error(err);
@@ -346,7 +345,9 @@ export default function CategoriesManagement() {
 
                                 <button
                                     className="bg-red-600 text-white py-1 rounded hover:bg-red-700"
-                                    onClick={() => {setConfirmDelete({ id: category.id, name: category.name })
+                                    onClick={() => {
+                                        setConfirmDelete({ id: category.id, name: category.name });
+                                        setError(null); 
                                     }}
                                 >
                                     Delete
