@@ -34,6 +34,13 @@ public class AnnouncementController {
 
     // Create Announcement Endpoint
     // ----------------------------------------------------------------------------------------------------------------
+    /**
+     * Creates a new announcement.
+     * Requires ADMIN role.
+     * 
+     * @param announcement the announcement to create
+     * @return ResponseEntity indicating success
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Void> createAnnouncement(@RequestBody Announcement announcement) {
