@@ -2,6 +2,7 @@ package com.example.reactserver.Infrastructure;
 
 // Imports
 // ===============================================================================================================================================
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -59,10 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Define Filter
     // --------------------------------------------------------------------------------------------
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull  HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String token = extractTokenFromCookie(request);
 
@@ -77,8 +77,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails user = userDetailsService.loadUserByUsername(email);
 
             // Define Authenticated User
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    user, null, user.getAuthorities());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+                    user.getAuthorities());
 
             // Set Authenticated User
             SecurityContextHolder.getContext().setAuthentication(auth);

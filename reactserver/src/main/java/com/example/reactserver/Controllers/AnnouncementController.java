@@ -1,6 +1,7 @@
 package com.example.reactserver.Controllers;
 
-// Imports 
+// ===============================================================================================================================================
+// Imports
 // ===============================================================================================================================================
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,31 +17,47 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
-// Class
+
+
+// ===============================================================================================================================================
+/**
+ * REST controller for managing announcements.
+ * Provides endpoints for creating and retrieving announcements.
+ */
 // ===============================================================================================================================================
 @RestController
 @RequestMapping("/api/announcements")
 public class AnnouncementController {
 
+    // ----------------------------------------------------------------------------------------------------------------
     // Properties
     // ----------------------------------------------------------------------------------------------------------------
-    private AnnouncementRepository announcementRepository;
+    private final AnnouncementRepository announcementRepository;
 
-    // Constructor
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    /**
+     * Constructor: Create an AnnouncementController with the given repository.
+     * 
+     * @param announcementRepository the repository for announcement data access
+     */
     // ----------------------------------------------------------------------------------------------------------------
     public AnnouncementController(AnnouncementRepository announcementRepository) {
         this.announcementRepository = announcementRepository;
     }
 
-    // Create Announcement Endpoint
+
+
     // ----------------------------------------------------------------------------------------------------------------
     /**
-     * Creates a new announcement.
+     * Endpoint: Create a new Announcement.
      * Requires ADMIN role.
      * 
      * @param announcement the announcement to create
      * @return ResponseEntity indicating success
      */
+    // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Void> createAnnouncement(@RequestBody Announcement announcement) {
@@ -52,7 +69,15 @@ public class AnnouncementController {
         return ResponseEntity.ok().build();
     }
 
-    // Get Announcements Endpoint
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    /**
+     * Retrieves all announcements.
+     * Accessible to ADMIN, TECHNICIAN, and USER roles.
+     * 
+     * @return list of all announcements
+     */
     // ----------------------------------------------------------------------------------------------------------------
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN', 'USER')")
     @GetMapping

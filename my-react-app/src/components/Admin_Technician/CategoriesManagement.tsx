@@ -154,8 +154,13 @@ export default function CategoriesManagement() {
             if (res.ok) {
                 setSuccess("Successfully updated the Category!");
             } else {
-                const msg = await res.text();
-                throw new Error("Error occurred when updating the category:" + msg);
+                // Optionally log backend message ONLY for debugging
+                const backendMsg = await res.text();
+                console.error("Backend error:", backendMsg);
+
+                // Throw clean frontend error
+                throw new Error("UPDATE_CATEGORY_FAILED");
+                
             }
         } catch(error) {
             console.error(error);
@@ -184,7 +189,7 @@ export default function CategoriesManagement() {
         } catch (err) {
             console.error(err);
             setSuccess(null);
-            setError(err instanceof Error ? err.message : "Unknown error");
+            setError("Error deleting category. It might be in use by a Request.");
         }
     }
 
@@ -204,7 +209,7 @@ export default function CategoriesManagement() {
                 {/* Show Error, if any */}
                 { error && 
                     <p className="max-w-3/4 rounded-lg mx-auto p-3 text-lg mb-5 bg-red-300">
-                        {error}
+                        An error occurred
                     </p>
                 }
 
